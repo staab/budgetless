@@ -1,0 +1,3 @@
+--ignore-dir=.janet-v1.6.0-osx
+--ignore-file=match:.fdignore
+--ignore-file=match:.ackrc

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export $(cat env.local)
+export janet=$JANET_PATH/janet
+export jpm=$JANET_PATH/jpm
+
+eval "$@"
