@@ -1,3 +1,5 @@
 build
 env.local
 .janet-v1.6.0-osx
+node_modules
+public

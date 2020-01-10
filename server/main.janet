@@ -8,6 +8,7 @@
 
 (def ct/json "application/json")
 (def ct/html "text/html")
+(def ct/css "text/css")
 (def ct/svg "image/svg+xml")
 
 (defn ok [ct body]
@@ -25,7 +26,8 @@
     (let [[head] (string/split "/" (req :uri) 1)]
       (case head
        "/" (ok ct/html (slurp "web/index.html"))
-       "/web" (ok ct/html (slurp (drop 1 head)))
+       "/web" (ok ct/css (slurp (drop 1 (req :uri))))
+       "/public" (ok ct/html (slurp (drop 1 (req :uri))))
        "/api" (api-handler req)
        (bad 404 (json/encode {:detail "Not found"}))))))
 

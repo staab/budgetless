@@ -3,3 +3,4 @@ build
 LICENSE
 .fdignore
 .janet-v1.6.0-osx
+node_modules
