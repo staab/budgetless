@@ -1,5 +1,9 @@
+(import pq)
 (import halo)
 (import json)
+
+(def conn (pq/connect (os/getenv "DATABASE_URL")))
+(pp (pq/exec conn "select 1"))
 
 (defn curl [method url]
   (let [cmd (string/join ["curl -X" method url "--silent"] " ")]

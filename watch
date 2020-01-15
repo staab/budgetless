@@ -2,6 +2,6 @@
 
 npx rollup -c -w &
 
-fd . | entr -r ./start &
+find . | entr -r ./start &
 
 wait

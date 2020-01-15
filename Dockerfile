@@ -2,8 +2,12 @@
 
 FROM ubuntu:19.10
 
-# Install make
-RUN apt -q update && apt install -yq make gcc git curl
+# Add sources
+RUN curl -sL https://deb.nodesource.com/setup_13.x | bash -
+
+# Install system dependencies
+RUN apt -q update && apt install -yq \
+  make gcc git curl nodejs pkg-config libpq-dev entr npm
 
 # Install Janet
 RUN cd /tmp && \

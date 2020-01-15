@@ -1,0 +1,17 @@
+#!/bin/bash
+
+export $(cat env.local)
+
+ip=$(ipconfig getifaddr en0)
+
+docker build -t budgetless .
+
+# https://stackoverflow.com/a/31249288/1467342
+# https://gist.github.com/MauricioMoraes/87d76577babd4e084cba70f63c04b07d
+# https://www.thegeekstuff.com/2014/02/enable-remote-postgresql-connection/
+docker run --rm -it \
+  --name budgetless \
+  --add-host=host:$ip \
+  -v $PWD:/var/app \
+  -p $PORT:$PORT \
+  budgetless bash
