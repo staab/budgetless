@@ -3,3 +3,5 @@ env.local
 node_modules
 public
 lib
+.npm
+.bash_history

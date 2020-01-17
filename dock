@@ -1,6 +1,13 @@
 #!/bin/bash
 
-export $(cat env.local)
+eval $(docker-machine env default)
+
+if [[ $(docker ps | grep budgetless | wc -l) -gt 0 ]]; then
+  docker exec -it budgetless bash
+  exit 0
+fi
+
+export $(cat env.local | grep -v '#')
 
 ip=$(ipconfig getifaddr en0)
 
@@ -15,3 +22,4 @@ docker run --rm -it \
   -v $PWD:/var/app \
   -p $PORT:$PORT \
   budgetless bash
+

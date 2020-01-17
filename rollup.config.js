@@ -1,5 +1,6 @@
 import svelte from 'rollup-plugin-svelte'
 import resolve from '@rollup/plugin-node-resolve'
+import replace from '@rollup/plugin-replace'
 import commonjs from '@rollup/plugin-commonjs'
 import livereload from 'rollup-plugin-livereload'
 import {terser} from 'rollup-plugin-terser'
@@ -15,6 +16,13 @@ export default {
 		file: 'public/bundle.js'
 	},
 	plugins: [
+  	replace({
+    	process: JSON.stringify({
+      	env: {
+          PLAID_PUBLIC_KEY: process.env.PLAID_PUBLIC_KEY,
+      	},
+    	}),
+  	}),
 		svelte({
 			dev: !production,
 			css: css => css.write('public/bundle.css'),

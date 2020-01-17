@@ -1,5 +1,5 @@
 #!/bin/bash
 
-export $(cat env.local)
+export $(cat env.local | grep -v '#')
 
-eval $@
+eval "${@}"
