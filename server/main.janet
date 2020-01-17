@@ -1,10 +1,6 @@
-(import pq)
 (import halo)
 (import json)
-
-(def conn (pq/connect (os/getenv "DATABASE_URL")))
-(put pq/*decoders* 2950 string)
-(defn uuidgen [] (pq/exec conn "select uuid_generate_v4()"))
+(import server/db :as db)
 
 (def ct/json "application/json")
 (def ct/html "text/html")
@@ -51,7 +47,7 @@
   (let [path "/item/public_token/exchange"
         body (json/decode (req :body))
         res (json/decode (plaid "POST" path body))
-        session-key (uuidgen)]
+        session-key (db/uuidgen)]
     (ok
      ct/json
      (json/encode {:item_id (res "item_id")})
@@ -83,5 +79,6 @@
       res)))
 
 (defn main [& args]
+  (db/connect)
   (let [port (eval-string (os/getenv "PORT"))]
     (halo/server (log-handler handler) port)))

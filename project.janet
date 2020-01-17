@@ -2,7 +2,7 @@
   :name "budgetless"
   :description "A simple, budgetless personal finance app"
   :dependencies ["https://github.com/joy-framework/halo.git"
-                 "https://github.com/andrewchambers/janet-pq.git"
+                 "https://github.com/staab/janet-pgutils.git"
                  "https://github.com/janet-lang/json.git"])
 
 (declare-executable

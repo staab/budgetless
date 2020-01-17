@@ -1,6 +1,6 @@
 #!/bin/bash
 
-npx rollup -c -w &
+./run npx rollup -c -w &
 
 find . | entr -r ./start &
 
