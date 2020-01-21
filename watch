@@ -1,9 +1,7 @@
 #!/bin/bash
 
-if [[ $1 == '-b' ]]; then
-  docker build -t budgetless .
-fi
+export $(cat env.local | grep -v '#')
 
-# ./run npx rollup -c -w &
+./run npx rollup -c -w &
 
-fd . | entr -r ./dock
+fd . | entr -r janet server/main.janet

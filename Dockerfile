@@ -17,6 +17,15 @@ RUN cd /tmp && \
     rm -rf /tmp/janet
 RUN chmod 777 /usr/local/lib/janet
 
+# Set group and user IDs for docker user
+ARG GID=1000
+ARG UID=1000
+ARG USER=me
+
+# Create the group and user
+RUN groupadd -g $GID $USER
+RUN useradd -g $GID -M -u $UID -d /var/app $USER
+
 # Application setup
 COPY ./ /var/app
 WORKDIR /var/app
