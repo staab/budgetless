@@ -1,4 +1,12 @@
 <script>
+  import {Router, Link, Route} from "svelte-routing"
+  import Landing from 'routes/Landing'
+  import Dashboard from 'routes/Dashboard'
+  import Account from 'routes/Account'
+  import Logout from 'routes/Logout'
+
+  export let url = "";
+
   const handler = Plaid.create({
     clientName: 'Budgetless',
     countryCodes: ['US'],
@@ -14,7 +22,19 @@
 </script>
 
 <main>
-	<h1>Hello world!</h1>
+  <Router {url}>
+    <nav>
+      <Link to="/dashboard">Dashboard</Link>
+      <Link to="/account">Account</Link>
+      <Link to="/logout">Log Out</Link>
+    </nav>
+    <div>
+      <Route path="dashboard" component={Dashboard} />
+      <Route path="account" component={Account} />
+      <Route path="logout" component={Logout} />
+      <Route path="/"><Landing /></Route>
+    </div>
+  </Router>
 	<button on:click={() => handler.open()}>Link</button>
 </main>
 

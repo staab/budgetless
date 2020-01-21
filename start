@@ -1,3 +1,5 @@
 #!/bin/bash
 
-./run 'janet -l ./server/main -e "(main)"'
+export $(cat env.local | grep -v '#')
+
+janet -l ./server/main -e "(main)"

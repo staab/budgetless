@@ -1,7 +1,9 @@
 #!/bin/bash
 
-./run npx rollup -c -w &
+if [[ $1 == '-b' ]]; then
+  docker build -t budgetless .
+fi
 
-find . | entr -r ./start &
+# ./run npx rollup -c -w &
 
-wait
+fd . | entr -r ./dock
