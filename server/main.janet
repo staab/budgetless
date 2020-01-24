@@ -66,11 +66,10 @@
     (let [[head] (string/split "/" (req :uri) 1)]
       (or
        (case head
-        "/" (ok ct/html (slurp "web/index.html"))
         "/web" (ok ct/css (slurp (drop 1 (req :uri))))
         "/public" (ok ct/html (slurp (drop 1 (req :uri))))
         "/api" (api/root req))
-       (bad 404 (json/encode {:detail "Not found"}))))))
+       (ok ct/html (slurp "index.html"))))))
 
 (defn log-handler [h]
   (fn [req]

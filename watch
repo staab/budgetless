@@ -2,6 +2,6 @@
 
 export $(cat env.local | grep -v '#')
 
-./run npx rollup -c -w &
+npx rollup -c -w &
 
 fd . | entr -r janet server/main.janet

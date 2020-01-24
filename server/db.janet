@@ -1,7 +1,7 @@
-(import pqutils :as sql)
+(import pqutils :as pq)
 
-(put sql/*decoders* 2950 string)
+(put pq/*decoders* 2950 string)
 
-(defn connect []  (sql/connect (os/getenv "DATABASE_URL")))
+(defn connect []  (pq/connect (os/getenv "DATABASE_URL")))
 
-(defn uuidgen [] (sql/scalar "select uuid_generate_v4()"))
+(defn uuidgen [] (pq/val "select uuid_generate_v4()"))
