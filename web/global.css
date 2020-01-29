@@ -2,6 +2,10 @@ html, body, .rajdhani {
   font-family: 'Rajdhani', sans-serif;
 }
 
+button {
+  outline: none;
+}
+
 .karla {
   font-family: 'Karla', sans-serif;
 }

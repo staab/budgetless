@@ -6,6 +6,18 @@
 (def ct/html "text/html")
 (def ct/css "text/css")
 (def ct/svg "image/svg+xml")
+(def ct/png "image/png")
+(def ct/js "application/javascript")
+
+(defn infer-ct [path]
+  (case (keyword (in (string/split "." path) 1))
+    :json ct/json
+    :html ct/html
+    :css ct/css
+    :svg ct/svg
+    :png ct/png
+    :js ct/js
+    "application/octet-stream"))
 
 (defn curl/stringify-headers [xs]
   (string/join (map (fn [[k v]] (string "-H '" k ":" v "'")) (pairs (or xs []))) " "))
@@ -41,7 +53,7 @@
 (defn bad [status-code body]
   {:status status-code
    :headers {"Content-Type" ct/json}
-   :body body})
+   :body (json/encode body)})
 
 (defn api/link [req]
   (let [path "/item/public_token/exchange"
@@ -61,22 +73,23 @@
             ))))
 
 (defn handler [req]
-  (if (string/find ".." (req :uri))
+  (def [path qs] (string/split "?" (req :uri)))
+  (if (string/find ".." path)
     (bad 404 (json/encode {:detail "Not found"}))
-    (let [[head] (string/split "/" (req :uri) 1)]
+    (let [[head] (string/split "/" path 1)]
       (or
        (case head
-        "/web" (ok ct/css (slurp (drop 1 (req :uri))))
-        "/public" (ok ct/html (slurp (drop 1 (req :uri))))
+        "/" (ok ct/html (slurp "index.html"))
+        "/web" (ok (infer-ct path) (slurp (drop 1 path)))
+        "/public" (ok (infer-ct path) (slurp (drop 1 path)))
         "/api" (api/root req))
-       (ok ct/html (slurp "index.html"))))))
+       (bad 404 {:detail "Not found"})))))
 
 (defn log-handler [h]
   (fn [req]
     (let [res (h req)]
-      (pp (string (req :uri) "?" (req :query-string) " => " (res :status)))
+      (pp (string (req :uri) " => " (res :status)))
       res)))
-
 
 (defn main [& args]
   (db/connect)

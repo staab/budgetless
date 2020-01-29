@@ -1,4 +1,5 @@
 <script>
+  import {Link} from "svelte-routing"
   import Footer from "partials/Footer.svelte"
 </script>
 
@@ -21,13 +22,17 @@
   <h4 class="text-xl text-gray-800 mb-10">
     effortless personal finance
   </h4>
-  <button class="rounded bg-teal-300 border-2 border-teal-200
-                 border-solid mb-2 px-6 py-3 text-white p-4 font-semibold
-                 text-2xl hover:bg-teal-400 shadow-lg">
-    Get Started
-  </button>
+  <Link to="/signup">
+    <button class="rounded bg-teal-300 border-2 border-teal-200
+                   border-solid mb-2 px-6 py-3 text-white p-4 font-semibold
+                   text-2xl hover:bg-teal-400 shadow-lg">
+      Get Started
+    </button>
+  </Link>
   <div>
-    Or, <span class="text-teal-400 underline">Log In</span>
+    Or, <span class="text-teal-400 underline">
+      <Link to="/login">Log In</Link>
+    </span>
   </div>
 </div>
 <div class="h-1 bg-gradient-2" />
@@ -101,11 +106,13 @@
     </ul>
   </div>
   <div class="text-center rajdhani mt-10 mb-8">
-    <button class="rounded bg-teal-300 border-2 border-teal-200
-                   border-solid mb-2 px-6 py-3 text-white p-4 font-semibold
-                   text-2xl hover:bg-teal-400 shadow-lg">
-      Sign Up
-    </button>
+    <Link to="/signup">
+      <button class="rounded bg-teal-300 border-2 border-teal-200
+                     border-solid mb-2 px-6 py-3 text-white p-4 font-semibold
+                     text-2xl hover:bg-teal-400 shadow-lg">
+        Sign Up
+      </button>
+    </Link>
   </div>
 </div>
 <Footer />

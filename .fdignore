@@ -4,4 +4,3 @@ LICENSE
 .fdignore
 .npm
 node_modules
-public
