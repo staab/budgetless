@@ -43,12 +43,13 @@
   (if (string/find ".." path)
     (bad 404 (json/encode {:detail "Not found"}))
     (let [[head] (string/split "/" path 1)]
-      (or
-       (case head
-        "/" (ok ct/html (slurp "index.html"))
-        "/api" (api/root req)
-        "/public" (ok (ct/infer path) (slurp (string "." path))))
-       (bad 404 {:detail "Not found"})))))
+      (if (string/find "text/html" (get-in req [:headers "Accept"] ""))
+        (ok ct/html (slurp "index.html"))
+        (or
+         (case head
+          "/api" (api/root req)
+          "/public" {:file (string "." path)})
+         (bad 404 {:detail "Not found"}))))))
 
 (defn log-handler [h]
   (fn [req]
