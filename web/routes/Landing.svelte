@@ -51,7 +51,7 @@
       We’re here to help you understand your spending habits.
     </p>
     <div class="py-12 pl-2 pr-16">
-      <img src="/web/images/bubble-graph.png" alt="Bubble graph" />
+      <img src="/public/images/bubble-graph.png" alt="Bubble graph" />
     </div>
   </div>
 </div>
@@ -75,7 +75,7 @@
       the key to controlling your finances.
     </p>
     <div class="py-12">
-      <img src="/web/images/line-graph.png" alt="Line graph" />
+      <img src="/public/images/line-graph.png" alt="Line graph" />
     </div>
   </div>
 </div>

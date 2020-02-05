@@ -1,6 +1,6 @@
 <style>
   .door {
-    background-image: url('/web/images/bubble-graph.png');
+    background-image: url('/public/images/bubble-graph.png');
   }
 </style>
 

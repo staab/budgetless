@@ -46,9 +46,8 @@
       (or
        (case head
         "/" (ok ct/html (slurp "index.html"))
-        "/web" (ok (ct/infer path) (slurp (drop 1 path)))
-        "/public" (ok (ct/infer path) (slurp (drop 1 path)))
-        "/api" (api/root req))
+        "/api" (api/root req)
+        "/public" (ok (ct/infer path) (slurp (string "." path))))
        (bad 404 {:detail "Not found"})))))
 
 (defn log-handler [h]
