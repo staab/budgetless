@@ -3,11 +3,6 @@
   "version": "1.0.0",
   "repository": "git@github.com:staab/budgetless.git",
   "author": "Jon Staab <shtaab@gmail.com>",
-  "scripts": {
-    "start:client": "./run npx rollup -c -w",
-    "start:server": "./start",
-    "start": "run-p start:*"
-  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^11.0.0",
     "@rollup/plugin-node-resolve": "^6.0.0",
