@@ -4,7 +4,7 @@
   :dependencies [
                  "https://github.com/joy-framework/halo.git"
                  "https://github.com/joy-framework/http.git"
-                 "https://github.com/staab/janet-pgutils.git"
+                 "https://github.com/andrewchambers/janet-pq.git"
                  "https://github.com/janet-lang/json.git"])
 
 (declare-executable

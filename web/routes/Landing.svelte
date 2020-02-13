@@ -31,7 +31,7 @@
   </Link>
   <div>
     Or, <span class="text-teal-400 underline">
-      <Link to="/login">Log In</Link>
+      <Link to="/login/email">Log In</Link>
     </span>
   </div>
 </div>

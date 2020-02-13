@@ -1,4 +1,6 @@
 <script>
+  import {Link} from "svelte-routing"
+  import {logError} from 'util/misc'
   import Door from 'partials/Door'
   import ExternalLink from 'partials/ExternalLink'
 
@@ -8,18 +10,17 @@
 
   const onSubmit = async () => {
     try {
-      const {status} = await fetch('/api/request-access', {
-        method: 'post',
-        body: JSON.stringify({email}),
-      })
+      const res = await fetchJson('post', '/api/request-access', {email})
 
-      if (status >= 300) {
-        error = "Oops! Something went wrong, please try again."
+      if (res.status === 400) {
+        error = res.detail
       } else {
         message = "Success! We'll let you know when Budgetless is ready."
         error = null
       }
     } catch (e) {
+      logError(e)
+
       error = "Oops! Something went wrong, please try again."
     }
   }
@@ -36,14 +37,15 @@
     </p>
     {#if message}
     <p class="my-1 font-semibold">{message}</p>
+    <p class="my-1">
+      <Link to="/"><i class="fas fa-arrow-left" /> Back to homepage</Link>
+    </p>
     {:else}
     <div class="form-row text-lg">
-      <span class="my-1 mx-2 absolute z-10 text-gray-700">@</span>
       <input
         name="email"
         type="string"
         class="input w-full max-w-sm"
-        style="padding-left: 2rem;"
         placeholder="me@example.com"
         bind:value={email} />
     </div>
@@ -57,7 +59,7 @@
       <ExternalLink href="https://github.com/staab/budgetless">github</ExternalLink>.
     </p>
     <div class="text-right">
-      <button class="button button-primary">Ok</button>
+      <button class="button">Ok</button>
     </div>
     {/if}
   </form>

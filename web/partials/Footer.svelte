@@ -8,7 +8,7 @@
   <ul class="mb-6">
     <li class="py-1"><a href="https://github.com/staab">About</a></li>
     <li class="py-1"><a href="mailto:shtaab@gmail.com">Contact</a></li>
-    <li class="py-1"><Link to="/login">Log In</Link></li>
+    <li class="py-1"><Link to="/login/email">Log In</Link></li>
   </ul>
   <small>All Rights Reserved. Copyright {year}, Jonathan Staab</small>
 </nav>
