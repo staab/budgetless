@@ -8,18 +8,13 @@
   let error = null
 
   const onSubmit = async () => {
-    try {
-      const res = await fetchJson('post', '/api/send-login-code', {email})
+    const [e, r] = await fetchJson('post', '/api/send-login-code', {email})
 
-      if (res.status === 400) {
-        error = res.detail
-      } else {
-        navigate("/login/code")
-      }
-    } catch (e) {
-      logError(e)
 
-      error = "Oops! Something went wrong, please try again."
+    if (e) {
+      error = e.detail
+    } else {
+      navigate(`/login/code?email=${email}`)
     }
   }
 </script>

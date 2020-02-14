@@ -1,6 +1,6 @@
 <script>
   import {Link} from "svelte-routing"
-  import {logError} from 'util/misc'
+  import {logError, fetchJson} from 'util/misc'
   import Door from 'partials/Door'
   import ExternalLink from 'partials/ExternalLink'
 
@@ -9,20 +9,10 @@
   let message = null
 
   const onSubmit = async () => {
-    try {
-      const res = await fetchJson('post', '/api/request-access', {email})
+    const [e, r] = await fetchJson('post', '/api/request-access', {email})
 
-      if (res.status === 400) {
-        error = res.detail
-      } else {
-        message = "Success! We'll let you know when Budgetless is ready."
-        error = null
-      }
-    } catch (e) {
-      logError(e)
-
-      error = "Oops! Something went wrong, please try again."
-    }
+    error = e ? e.detail : null
+    message = e ? null : "Success! We'll let you know when Budgetless is ready."
   }
 
   const loginDemo = () => console.log('hi')

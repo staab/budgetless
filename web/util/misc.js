@@ -20,11 +20,17 @@ export const fetchJson = async(method, url, body) => {
     },
   })
 
-  if (!res.ok || status >= 500) {
-    throw res.statusText
+  if (res.status >= 500) {
+    logError(res.statusText)
+
+    return [null, {
+      detail: "Oops! Something went wrong, please try again."
+    }]
   }
 
-  return {status, ...await res.json()}
+  const result = {status: res.status, ...await res.json()}
+
+  return res.status >= 400 ? [result, null] : [null, result]
 }
 
 export const logError = e => {

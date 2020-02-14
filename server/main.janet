@@ -1,10 +1,16 @@
 (import halo)
 (import json)
+(use server/util)
 (import server/db)
 (import server/ct)
 (import server/plaid)
 
+(def ADMIN_EMAIL "shtaab@gmail.com")
+
 (defn tp [l x] (pp [l x]) x)
+
+(defn send-email [to template data]
+ (pp [(string "Fake email to " to " using template " template) data]))
 
 (defn get-cookie [req k]
   (let [xs (->>
@@ -39,28 +45,38 @@
      {"Set-Cookie" (string "session=" session-key)})))
 
 (defn api/log-error [req]
-  )
+  (send-email ADMIN_EMAIL :error req))
 
 (defn api/request-access [req]
   (if-let [email (get-email-from-req req)]
     (do
-      (db/insert :access_requests {:email email})
+      (send-email ADMIN_EMAIL :request-access {:email email})
       (ok-json {}))
     (bad 400 {:detail "Please enter a valid email address."})))
 
 (defn api/send-login-code [req]
-  (if-let [email (get-email-from-req req)]
+  (if-let [email (get-email-from-req req)
+           account (db/get-account-by-email email)
+           login-code (db/refresh-login-code (account :id))]
     (do
-      Something
+      (send-email email :login-code {:login-code login-code})
       (ok-json {}))
-    (bad 400 {:detail "Please enter a valid email address."})))
+    (bad 400 {:detail "No account was found for that email address."})))
+
+(defn api/login-with-code [req]
+  (if-let [email (get-in req [:json :email])
+           code (get-in req [:json :login_code])
+           account (db/get-account-by-code email code)]
+    (ok-json (pick [:id :email] account))
+    (bad 400 {:detail "No account was found for that email address."})))
 
 (defn api/root [req]
   (let [k (string (req :method) " " (last (string/split "/" (req :uri) 1)))]
-    (pp k)
     (case k
       "POST link" (api/link req)
       "POST request-access" (api/request-access req)
+      "POST send-login-code" (api/send-login-code req)
+      "POST login-with-code" (api/login-with-code req)
       )))
 
 (defn handler [req]
