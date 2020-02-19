@@ -37,12 +37,15 @@
     (if (string/find "@" email) email nil)))
 
 (defn api/link [req]
-  (let [path "/item/public_token/exchange"
-        res (json/decode (plaid/post path (req :json)))
-        session-key (db/uuidgen)]
-    (ok-json
-     {:item_id (res "item_id")}
-     {"Set-Cookie" (string "session=" session-key)})))
+  (if-let [session-key (get-cookie req "session")
+           session (db/row :session {:key session-key})
+           path "/item/public_token/exchange"
+           res (json/decode (plaid/post path (req :json)))
+           item-id (res "item_id")]
+    (do
+      (db/update :account {:item item-id} {:id (session :account)})
+      (ok-json {:item_id item-id}))
+    (bad 401 {:detail "No session found"})))
 
 (defn api/log-error [req]
   (send-email ADMIN_EMAIL :error req))
@@ -66,8 +69,11 @@
 (defn api/login-with-code [req]
   (if-let [email (get-in req [:json :email])
            code (get-in req [:json :login_code])
-           account (db/get-account-by-code email code)]
-    (ok-json (pick [:id :email] account))
+           account (db/get-account-by-code email code)
+           session-key (db/create-session (account :id))]
+    (ok-json
+      (pick [:id :email] account)
+      {"Set-Cookie" (string "session=" session-key)})
     (bad 400 {:detail "No account was found for that email address."})))
 
 (defn api/root [req]
@@ -79,18 +85,26 @@
       "POST login-with-code" (api/login-with-code req)
       )))
 
+(def client-routes
+  (->> (slurp "web/App.svelte")
+       (string/split "\n")
+       (filter |(string/find "path=" $))
+       (map |(in (string/split "\"" $) 1))
+       (map |(tuple (string "/" (if (= "*" $) "" $)) {:file "index.html"}))
+       (flatten)
+       (apply struct)))
+
 (defn handler [req]
   (def [path qs] (string/split "?" (req :uri)))
   (if (string/find ".." path)
     (bad 404 (json/encode {:detail "Not found"}))
     (let [[head] (string/split "/" path 1)]
-      (if (string/find "text/html" (get-in req [:headers "Accept"] ""))
-        (ok ct/html (slurp "index.html"))
-        (or
-         (case head
-          "/api" (api/root req)
-          "/public" {:file (string "." path)})
-         (bad 404 {:detail "Not found"}))))))
+      (or
+       (get client-routes path)
+       (case head
+        "/api" (api/root req)
+        "/public" {:file (string "." path)})
+       (bad 404 {:detail "Not found"})))))
 
 (defn log-handler [h]
   (fn [req]

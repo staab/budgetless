@@ -2,6 +2,7 @@
   import {parse} from 'qs'
   import {Link, navigate} from "svelte-routing"
   import {fetchJson, logError} from 'util/misc'
+  //import {user} from 'util/state'
   import Door from 'partials/Door'
   import ExternalLink from 'partials/ExternalLink'
 
@@ -15,7 +16,8 @@
     if (e) {
       error = e.detail
     } else {
-      // navigate("/login/code")
+
+      navigate("/plaid/link")
     }
   }
 </script>

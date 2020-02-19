@@ -5,3 +5,10 @@ create table if not exists account (
   login_code text,
   login_code_expires timestamp
 );
+
+create table if not exists session (
+  id uuid primary key,
+  created timestamp not null default now(),
+  key text not null,
+  account uuid not null
+);
