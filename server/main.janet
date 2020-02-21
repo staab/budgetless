@@ -1,6 +1,7 @@
 (import halo)
 (import json)
-(use server/util)
+(import util/pq)
+(import util/misc)
 (import server/db)
 (import server/ct)
 (import server/plaid)
@@ -38,7 +39,7 @@
 
 (defn api/link [req]
   (if-let [session-key (get-cookie req "session")
-           session (db/row :session {:key session-key})
+           session (pq/row :session {:key session-key})
            path "/item/public_token/exchange"
            res (json/decode (plaid/post path (req :json)))
            item-id (res "item_id")]
@@ -72,7 +73,7 @@
            account (db/get-account-by-code email code)
            session-key (db/create-session (account :id))]
     (ok-json
-      (pick [:id :email] account)
+      (misc/pick [:id :email] account)
       {"Set-Cookie" (string "session=" session-key)})
     (bad 400 {:detail "No account was found for that email address."})))
 
