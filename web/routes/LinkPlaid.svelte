@@ -1,5 +1,6 @@
 <script>
-  import {Link, navigate} from "svelte-routing"
+  import {Link, navigate} from 'svelte-routing'
+  import {fetchJson} from 'util/misc'
   import Door from 'partials/Door'
 
   const plaid = Plaid.create({
@@ -8,11 +9,11 @@
     env: 'sandbox',
     key: process.env.PLAID_PUBLIC_KEY,
     product: ['transactions'],
-    onSuccess: public_token =>
-      fetch('/api/link', {
-        method: 'POST',
-        body: JSON.stringify({public_token}),
-      }),
+    onSuccess: async public_token => {
+      const [err, res] = await fetchJson('POST', '/api/link', {public_token})
+
+      console.log(err, res)
+    },
   })
 
 </script>

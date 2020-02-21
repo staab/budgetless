@@ -18,7 +18,7 @@
 </style>
 
 <div class="door w-full h-screen p-2 sm:pt-16">
-  <div class="bg-gray-800 text-white border-gray-600 rounded
+  <div class="bg-gray-800 text-white border-gray-600 rounded-lg
               shadow p-8 max-w-md m-auto">
     <h1 class="text-4xl text-teal-200 text-center my-6">Budgetless</h1>
     <slot />

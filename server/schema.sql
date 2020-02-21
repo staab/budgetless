@@ -3,7 +3,9 @@ create table if not exists account (
   created timestamp not null default now(),
   email text not null,
   login_code text,
-  login_code_expires timestamp
+  login_code_expires timestamp,
+  plaid_access_token text,
+  plaid_item_id text
 );
 
 create table if not exists session (

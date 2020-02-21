@@ -1,9 +1,9 @@
 (import halo)
 (import json)
 (import util/pq)
+(import util/ct)
 (import util/misc)
 (import server/db)
-(import server/ct)
 (import server/plaid)
 
 (def ADMIN_EMAIL "shtaab@gmail.com")
@@ -39,12 +39,14 @@
 
 (defn api/link [req]
   (if-let [session-key (get-cookie req "session")
-           session (pq/row :session {:key session-key})
+           session (db/select pq/row :session {:key session-key})
            path "/item/public_token/exchange"
-           res (json/decode (plaid/post path (req :json)))
-           item-id (res "item_id")]
+           {:access_token token :item_id item-id} (plaid/post path (req :json))]
     (do
-      (db/update :account {:item item-id} {:id (session :account)})
+      (db/update
+        :account
+        {:plaid_access_token token :plaid_item_id item-id}
+        {:id (session :account)})
       (ok-json {:item_id item-id}))
     (bad 401 {:detail "No session found"})))
 
