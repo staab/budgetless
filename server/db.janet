@@ -29,10 +29,12 @@
   (def vs (map |(data $) ks))
   (def k$ (map (fn [[i k]] (string (pq/ident k) "=" (string "$" (inc i))))
                (misc/enumerate ks)))
+  (def [where-vs where-sql] (build-where where (length ks)))
   (pq/exec
     (pq/composite "update" (pq/ident tbl) "set" (string/join k$ ",")
-               "where" (build-where where (length ks)))
-    ;vs))
+               "where" where-sql)
+    ;vs
+    ;where-vs))
 
 (defn connect []
   (pq/connect (os/getenv "DATABASE_URL"))

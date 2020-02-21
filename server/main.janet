@@ -43,10 +43,11 @@
            path "/item/public_token/exchange"
            {:access_token token :item_id item-id} (plaid/post path (req :json))]
     (do
+
       (db/update
         :account
         {:plaid_access_token token :plaid_item_id item-id}
-        {:id (session :account)})
+        {:id (pq/uuid (session :account))})
       (ok-json {:item_id item-id}))
     (bad 401 {:detail "No session found"})))
 
@@ -75,7 +76,7 @@
            account (db/get-account-by-code email code)
            session-key (db/create-session (account :id))]
     (ok-json
-      (misc/pick [:id :email] account)
+      (misc/pick [:id :email :item_id] account)
       {"Set-Cookie" (string "session=" session-key)})
     (bad 400 {:detail "No account was found for that email address."})))
 
