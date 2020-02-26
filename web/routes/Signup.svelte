@@ -9,7 +9,7 @@
   let message = null
 
   const onSubmit = async () => {
-    const [e, r] = await fetchJson('post', '/api/request-access', {email})
+    const [e, _] = await fetchJson('post', '/api/request-access', {email})
 
     error = e ? e.detail : null
     message = e ? null : "Success! We'll let you know when Budgetless is ready."

@@ -20,6 +20,14 @@
             (map |(string/split "=" $)))]
     ((table ;(flatten xs)) k)))
 
+(defn get-current-session [req]
+  (if-let [session-key (get-cookie req "session")]
+    (db/select pq/row :session {:key session-key})))
+
+(defn get-current-account [req]
+  (if-let [session (get-current-session req)]
+    (db/select pq/row :account {:id (pq/uuid (session :account))})))
+
 (defn ok [ct body &opt headers]
   {:status 200
    :headers (merge (or headers {}) {"Content-Type" ct})
@@ -37,18 +45,21 @@
   (let [email (get-in req [:json :email])]
     (if (string/find "@" email) email nil)))
 
+(defn api/whoami [req]
+  (if-let [account (get-current-account req)]
+    (ok-json (misc/pick [:id :email :plaid_item_id] account))
+    (bad 401 {:detail "No account found"})))
+
 (defn api/link [req]
-  (if-let [session-key (get-cookie req "session")
-           session (db/select pq/row :session {:key session-key})
+  (if-let [session (get-current-session req)
            path "/item/public_token/exchange"
            {:access_token token :item_id item-id} (plaid/post path (req :json))]
     (do
-
       (db/update
         :account
         {:plaid_access_token token :plaid_item_id item-id}
         {:id (pq/uuid (session :account))})
-      (ok-json {:item_id item-id}))
+      (ok-json {:plaid_item_id item-id}))
     (bad 401 {:detail "No session found"})))
 
 (defn api/log-error [req]
@@ -76,17 +87,24 @@
            account (db/get-account-by-code email code)
            session-key (db/create-session (account :id))]
     (ok-json
-      (misc/pick [:id :email :item_id] account)
+      (misc/pick [:id :email :plaid_item_id] account)
       {"Set-Cookie" (string "session=" session-key)})
     (bad 400 {:detail "No account was found for that email address."})))
+
+(defn api/logout [req]
+  (when-let [session-key (get-cookie req "session")]
+    (db/delete pq/exec :session {:key session-key}))
+  (ok-json {}))
 
 (defn api/root [req]
   (let [k (string (req :method) " " (last (string/split "/" (req :uri) 1)))]
     (case k
+      "GET whoami" (api/whoami req)
       "POST link" (api/link req)
       "POST request-access" (api/request-access req)
       "POST send-login-code" (api/send-login-code req)
       "POST login-with-code" (api/login-with-code req)
+      "POST logout" (api/logout req)
       )))
 
 (def client-routes

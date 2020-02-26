@@ -14,6 +14,10 @@
   (def [vs where-str] (build-where where))
   (f (pq/composite "select * from" (pq/ident tbl) "where" where-str) ;vs))
 
+(defn delete [f tbl where]
+  (def [vs where-str] (build-where where))
+  (f (pq/composite "delete from" (pq/ident tbl) "where" where-str) ;vs))
+
 (defn insert [tbl data]
   (def ks (keys data))
   (def vs (map |(data $) ks))
@@ -42,6 +46,9 @@
 
 # Domain Specific
 
+(defn get-account [id]
+  (select pq/row :account {:id (pq/uuid id)}))
+
 (defn get-account-by-email [email]
   (select pq/row :account {:email email}))
 
@@ -56,3 +63,4 @@
     (insert :session {:key (pq/uuid session-key)
                       :account (pq/uuid account-id)})
     session-key))
+

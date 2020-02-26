@@ -1,8 +1,9 @@
 <script>
   import {parse} from 'qs'
+  import {onMount} from 'svelte'
   import {Link, navigate} from "svelte-routing"
   import {fetchJson, logError} from 'util/misc'
-  //import {user} from 'util/state'
+  import {user} from 'util/state'
   import Door from 'partials/Door'
   import ExternalLink from 'partials/ExternalLink'
 
@@ -10,14 +11,21 @@
   let login_code = ''
   let error = null
 
+  onMount(() => {
+    if (!email) {
+      navigate('/login/email')
+    }
+  })
+
   const onSubmit = async () => {
     const [e, r] = await fetchJson('post', '/api/login-with-code', {email, login_code})
 
     if (e) {
       error = e.detail
     } else {
+      user.set(r.data)
 
-      navigate("/plaid/link")
+      navigate("/dashboard")
     }
   }
 </script>
