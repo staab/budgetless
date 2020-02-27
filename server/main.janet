@@ -48,7 +48,55 @@
 (defn api/whoami [req]
   (if-let [account (get-current-account req)]
     (ok-json (misc/pick [:id :email :plaid_item_id] account))
-    (bad 401 {:detail "No account found"})))
+    (bad 401 {:detail "No session found"})))
+
+(defn sync-plaid [{:plaid_access_token token :id account-id}]
+  (def limit 10)
+  (var offset 0)
+  (var done? false)
+  (defn sync-transactions [offset]
+    (let [payload {:access_token token
+                   :start_date (db/get-sync-start-date account-id)
+                   :end_date (db/date "now()")
+                   :options {:count limit :offset offset}}
+          res (plaid/post "/transactions/get" payload)]
+      (when-let [e (res :error_message)] (error e))
+      (each txn (res :transactions)
+        (db/insert-or-update
+          :transaction
+          :plaid_transaction_id
+          {:account (pq/uuid account-id)
+           :transaction_date (pq/date (txn :date))
+           :authorized_date (pq/date (txn :authorized_date))
+           :name (txn :name)
+           :transaction_type (txn :transaction_type)
+           :payment_channel (txn :payment_channel)
+           :amount (* 100 (txn :amount))
+           :pending (txn :pending)
+           :categories (pq/jsonb (txn :category))
+           :plaid_transaction_id (txn :transaction_id)
+           :plaid_account_id (txn :account_id)
+           :plaid_category_id (txn :category_id)}))
+      [(res :accounts) (res :total_transactions)]))
+  (while (not done?)
+    (let [[accounts total] (sync-transactions offset)]
+      (set offset (+ limit offset))
+      (set done? (<= total offset))
+      (when done?
+        (db/update
+          :account
+          {:balance (->> accounts
+                         (map |(get-in $ [:balances :available]))
+                         (filter identity)
+                         (reduce + 0)
+                         (* 100))}
+          {:id (pq/uuid account-id)})))))
+
+
+(defn api/dashboard [req]
+  (if-let [account (get-current-account req)]
+    (ok-json {:transactions (db/get-transactions (account :id))})
+    (bad 401 {:detail "No session found"})))
 
 (defn api/link [req]
   (if-let [session (get-current-session req)
@@ -86,9 +134,13 @@
            code (get-in req [:json :login_code])
            account (db/get-account-by-code email code)
            session-key (db/create-session (account :id))]
-    (ok-json
-      (misc/pick [:id :email :plaid_item_id] account)
-      {"Set-Cookie" (string "session=" session-key)})
+    (do
+      (sync-plaid account)
+      (ok-json
+        (misc/pick
+          [:id :email :plaid_item_id :balance]
+          (db/get-account (account :id)))
+        {"Set-Cookie" (string "session=" session-key)}))
     (bad 400 {:detail "No account was found for that email address."})))
 
 (defn api/logout [req]
@@ -100,6 +152,7 @@
   (let [k (string (req :method) " " (last (string/split "/" (req :uri) 1)))]
     (case k
       "GET whoami" (api/whoami req)
+      "GET dashboard" (api/dashboard req)
       "POST link" (api/link req)
       "POST request-access" (api/request-access req)
       "POST send-login-code" (api/send-login-code req)

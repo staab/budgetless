@@ -3,6 +3,9 @@
 
 # General purpose
 
+(defn date [sql]
+  (pq/val (pq/composite "select to_char(" sql ", 'yyyy-mm-dd')")))
+
 (defn build-where [where &opt param-offset]
   (default param-offset 0)
   (def ks (keys where))
@@ -18,27 +21,45 @@
   (def [vs where-str] (build-where where))
   (f (pq/composite "delete from" (pq/ident tbl) "where" where-str) ;vs))
 
-(defn insert [tbl data]
+(defn build-insert [tbl data offset]
   (def ks (keys data))
   (def vs (map |(data $) ks))
-  (def $$ (map |(string "$" (inc $)) (range (length ks))))
-  (pq/exec
-    (pq/composite "insert into" (pq/ident tbl)
-                  "(id, created," (string/join (map pq/ident ks) ",") ")"
-                  "values (uuid_generate_v4(), now(), " (string/join $$ ",") ")")
-    ;vs))
+  (def $$ (map |(string "$" (inc (+ offset $))) (range (length ks))))
+  [vs
+   (pq/composite
+     "(id, created," (string/join (map pq/ident ks) ",") ")"
+     "values (uuid_generate_v4(), now(), " (string/join $$ ",") ")")])
+
+(defn insert [tbl data]
+  (def [vs cmd] (build-insert tbl data 0))
+  (pq/exec (pq/composite "insert into" (pq/ident tbl) cmd) ;vs))
+
+(defn build-update [tbl data offset]
+  (def ks (keys data))
+  (def vs (map |(data $) ks))
+  (def k$ (map (fn [[i k]]
+                 (string (pq/ident k) "=" (string "$" (inc (+ offset i)))))
+               (misc/enumerate ks)))
+  [vs (pq/composite "set" (string/join k$ ","))])
 
 (defn update [tbl data where]
-  (def ks (keys data))
-  (def vs (map |(data $) ks))
-  (def k$ (map (fn [[i k]] (string (pq/ident k) "=" (string "$" (inc i))))
-               (misc/enumerate ks)))
-  (def [where-vs where-sql] (build-where where (length ks)))
+  (def [vs cmd] (build-update tbl data 0))
+  (def [where-vs where-sql] (build-where where (length vs)))
   (pq/exec
-    (pq/composite "update" (pq/ident tbl) "set" (string/join k$ ",")
-               "where" where-sql)
-    ;vs
-    ;where-vs))
+    (pq/composite "update" (pq/ident tbl) cmd  "where" where-sql)
+    ;vs ;where-vs))
+
+(defn insert-or-update [tbl unique-field data]
+  (pp [1 tbl])
+  (def [insert-vs insert-cmd] (build-insert tbl data 0))
+  (def [update-vs update-cmd] (build-update tbl data (length insert-vs)))
+  (pq/exec
+    (misc/tp "x" (pq/composite "insert into" (pq/ident tbl) insert-cmd
+                  "on conflict (" (pq/ident unique-field) ") do update"
+                  update-cmd))
+    ;insert-vs
+    ;update-vs))
+
 
 (defn connect []
   (pq/connect (os/getenv "DATABASE_URL"))
@@ -64,3 +85,14 @@
                       :account (pq/uuid account-id)})
     session-key))
 
+(defn get-sync-start-date [account-id]
+  (pq/val
+    `select to_char(
+       coalesce(max(transaction_date::timestamp), now()) - interval '7' day,
+       'yyyy-mm-dd'
+     )
+     from transaction where account = $1`
+    (pq/uuid account-id)))
+
+(defn get-transactions [account-id]
+  (select pq/all :transaction {:account (pq/uuid account-id)}))
