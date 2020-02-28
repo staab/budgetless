@@ -45,7 +45,7 @@
 
 (defn api/whoami [req]
   (if-let [account (get-current-account req)]
-    (ok-json (misc/pick [:id :email :plaid_item_id] account))
+    (ok-json (misc/pick [:id :email :plaid_item_id :balance] account))
     (bad 401 {:detail "No session found"})))
 
 (defn sync-plaid [{:plaid_access_token token :id account-id}]
@@ -177,7 +177,8 @@
        (get client-routes path)
        (case head
         "/api" (api/root req)
-        "/public" {:file (string "." path)})
+        "/public" {:file (string "." path)}
+        "/node_modules" {:file (string "." path)})
        (bad 404 {:detail "Not found"})))))
 
 (defn log-handler [h]

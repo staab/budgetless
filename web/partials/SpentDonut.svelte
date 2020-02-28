@@ -58,10 +58,8 @@
   }
 </style>
 
-<div class="relative -mx-10">
-  <canvas bind:this={canvas} />
-  <div class="absolute inset-0 flex flex-col justify-center align-center">
-    <span class="title text-center text-3xl">{dollars(thisWeek)}</span>
-    <span class="subtitle text-center w-1/3 text-sm mx-auto">Spent in the last week</span>
-  </div>
+<canvas bind:this={canvas} />
+<div class="absolute inset-0 flex flex-col justify-center align-center">
+  <span class="title text-center text-3xl">{dollars(thisWeek)}</span>
+  <span class="subtitle text-center w-1/3 text-sm mx-auto">Spent in the last week</span>
 </div>

@@ -1,5 +1,5 @@
 <script>
-  import Chart from 'chart.js'
+ import Chart from 'chart.js'
   import {onMount} from 'svelte'
   import {DateTime} from 'luxon'
   import {dollars} from 'util/misc'
@@ -24,7 +24,7 @@
     })
     .reduce((result, {amount}) => result - amount, 0)
 
-  const color = thisPeriod > lastPeriod ? '#FC8181' : '#81E6D9'
+  const color = thisPeriod > lastPeriod ? '#81E6D9' : '#FC8181'
   const data = thisPeriod > lastPeriod
     ? [thisPeriod, lastPeriod]
     : [lastPeriod, thisPeriod]
@@ -60,10 +60,8 @@
   }
 </style>
 
-<div class="relative -mx-10">
-  <canvas bind:this={canvas} />
-  <div class="absolute inset-0 flex flex-col justify-center align-center">
-    <span class="title text-center text-3xl">{dollars(thisPeriod)}</span>
-    <span class="subtitle text-center w-1/3 text-sm mx-auto">Earned in the last 35 days</span>
-  </div>
+<canvas bind:this={canvas} />
+<div class="absolute inset-0 flex flex-col justify-center align-center">
+  <span class="title text-center text-3xl">{dollars(thisPeriod)}</span>
+  <span class="subtitle text-center w-1/3 text-sm mx-auto">Earned in the last 35 days</span>
 </div>
