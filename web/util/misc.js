@@ -32,3 +32,8 @@ export const logError = e => {
 
   console.error(e)
 }
+
+export const addCommas = x =>
+  x.toString().replace(/(\d)(?=(\d{3})+$)/g, '$1,')
+
+export const dollars = x => '$' + addCommas(Math.round(x / 100))
