@@ -10,6 +10,7 @@
   const {email} = parse(window.location.search.slice(1))
   let login_code = ''
   let error = null
+  let loading = false
 
   onMount(() => {
     if (!email) {
@@ -18,7 +19,11 @@
   })
 
   const onSubmit = async () => {
+    loading = true
+
     const [e, r] = await fetchJson('post', '/api/login-with-code', {email, login_code})
+
+    loading = false
 
     if (e) {
       error = e.detail
@@ -50,7 +55,7 @@
     <p class="my-1 text-red-700">{error}</p>
     {/if}
     <div class="text-right">
-      <button class="button">Ok</button>
+      <button class="button" disabled={loading}>Ok</button>
     </div>
   </form>
 </Door>

@@ -8,8 +8,6 @@
 
 (def ADMIN_EMAIL "shtaab@gmail.com")
 
-(defn tp [l x] (pp [l x]) x)
-
 (defn send-email [to template data]
  (pp [(string "Fake email to " to " using template " template) data]))
 
@@ -51,12 +49,13 @@
     (bad 401 {:detail "No session found"})))
 
 (defn sync-plaid [{:plaid_access_token token :id account-id}]
+  (def start-date (db/get-sync-start-date account-id))
   (def limit 10)
   (var offset 0)
   (var done? false)
   (defn sync-transactions [offset]
     (let [payload {:access_token token
-                   :start_date (db/get-sync-start-date account-id)
+                   :start_date start-date
                    :end_date (db/date "now()")
                    :options {:count limit :offset offset}}
           res (plaid/post "/transactions/get" payload)]

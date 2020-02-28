@@ -50,13 +50,12 @@
     ;vs ;where-vs))
 
 (defn insert-or-update [tbl unique-field data]
-  (pp [1 tbl])
   (def [insert-vs insert-cmd] (build-insert tbl data 0))
   (def [update-vs update-cmd] (build-update tbl data (length insert-vs)))
   (pq/exec
-    (misc/tp "x" (pq/composite "insert into" (pq/ident tbl) insert-cmd
+    (pq/composite "insert into" (pq/ident tbl) insert-cmd
                   "on conflict (" (pq/ident unique-field) ") do update"
-                  update-cmd))
+                  update-cmd)
     ;insert-vs
     ;update-vs))
 
@@ -88,7 +87,10 @@
 (defn get-sync-start-date [account-id]
   (pq/val
     `select to_char(
-       coalesce(max(transaction_date::timestamp), now()) - interval '7' day,
+       coalesce(
+         max(transaction_date::timestamp - interval '7' day),
+         now() - interval '90' day
+        ),
        'yyyy-mm-dd'
      )
      from transaction where account = $1`
