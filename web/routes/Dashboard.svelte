@@ -5,6 +5,7 @@
   import SpentDonut from 'partials/SpentDonut'
   import EarnedDonut from 'partials/EarnedDonut'
   import BalanceChart from 'partials/BalanceChart'
+  import PurchaseDistribution from 'partials/PurchaseDistribution'
   import {user} from 'util/state'
   import {fetchJson, dollars} from 'util/misc'
   import {navigate} from 'svelte-routing'
@@ -41,7 +42,7 @@
       <EarnedDonut {transactions} />
     </div>
   </div>
-  <div class="flex text-2xl">
+  <div class="flex text-2xl mt-4">
     <div class="w-2/3 whitespace-no-wrap">
       Account Balance
       <Info content="The graph below shows your total available balance over
@@ -53,6 +54,15 @@
   </div>
   <div class="my-2">
     <BalanceChart {transactions} currentBalance={$user.balance} />
+  </div>
+  <div class="text-2xl w-2/3 whitespace-no-wrap mt-4">
+    Purchase Distribution
+    <Info content="Y-axis is average purchase amount. X-axis is the number
+                   of purchases in the last 60 days. Bubble size represents the
+                   relative amount spent on a given category." />
+  </div>
+  <div class="my-2">
+    <PurchaseDistribution {transactions} />
   </div>
   {/if}
 </div>
