@@ -1,2 +1,3 @@
-- Get email setup somehow, postmark wants a non-gmail addres
+- Get email setup somehow, postmark wants a non-gmail addres. Maybe mailgun
 - report both client and server side errors to database and email
+- Use a heroku worker process or a janet thread to sync accounts in the background (every ~6 hours? Maybe have a manual refresh?). Sync on signup rather than login for fast access. Stop syncing after inactivity, restart syncing on subsequent sign in.

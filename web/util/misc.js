@@ -37,3 +37,13 @@ export const addCommas = x =>
   x.toString().replace(/(\d)(?=(\d{3})+$)/g, '$1,')
 
 export const dollars = x => '$' + addCommas(Math.round(x / 100))
+
+export const dollarsk = x => {
+  if (x < 1000000) {
+    return dollars(x)
+  }
+
+  const fraction = (x % 10000) / 10000
+
+  return dollars(x).replace(/,\d{3}$/, `.${fraction}k`)
+}

@@ -50,7 +50,7 @@
 
 (defn sync-plaid [{:plaid_access_token token :id account-id}]
   (def start-date (db/get-sync-start-date account-id))
-  (def limit 10)
+  (def limit 100)
   (var offset 0)
   (var done? false)
   (defn sync-transactions [offset]

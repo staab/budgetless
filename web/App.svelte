@@ -1,5 +1,6 @@
 <script>
   import {onMount} from 'svelte'
+  import Chart from 'chart.js'
   import {Router, Route} from "svelte-routing"
   import Landing from 'routes/Landing'
   import Dashboard from 'routes/Dashboard'
@@ -14,6 +15,8 @@
 
   export let url = "";
   let loading = true
+
+  Chart.defaults.global.defaultFontColor = '#718096'
 
   onMount(async () => {
     const [e, r] = await fetchJson('GET', '/api/whoami',)

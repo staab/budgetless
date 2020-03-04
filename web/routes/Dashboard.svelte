@@ -4,6 +4,7 @@
   import Info from 'partials/Info'
   import SpentDonut from 'partials/SpentDonut'
   import EarnedDonut from 'partials/EarnedDonut'
+  import BalanceChart from 'partials/BalanceChart'
   import {user} from 'util/state'
   import {fetchJson, dollars} from 'util/misc'
   import {navigate} from 'svelte-routing'
@@ -42,11 +43,16 @@
   </div>
   <div class="flex text-2xl">
     <div class="w-2/3 whitespace-no-wrap">
-      Account Balance <Info content="stuff" />
+      Account Balance
+      <Info content="The graph below shows your total available balance over
+                     the last 30 days compared with the previous 30 days." />
     </div>
     <div class="w-1/3 text-right">
       {dollars($user.balance)}
     </div>
+  </div>
+  <div class="my-2">
+    <BalanceChart {transactions} currentBalance={$user.balance} />
   </div>
   {/if}
 </div>
