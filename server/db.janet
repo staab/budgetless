@@ -89,7 +89,7 @@
     `select to_char(
        coalesce(
          max(transaction_date::timestamp - interval '7' day),
-         now() - interval '90' day
+         now() - interval 120' day
         ),
        'yyyy-mm-dd'
      )

@@ -6,6 +6,7 @@
   import EarnedDonut from 'partials/EarnedDonut'
   import BalanceChart from 'partials/BalanceChart'
   import PurchaseDistribution from 'partials/PurchaseDistribution'
+  import PurchaseBreakdown from 'partials/PurchaseBreakdown'
   import {user} from 'util/state'
   import {fetchJson, dollars} from 'util/misc'
   import {navigate} from 'svelte-routing'
@@ -63,6 +64,14 @@
   </div>
   <div class="my-2">
     <PurchaseDistribution {transactions} />
+  </div>
+  <div class="text-2xl w-2/3 whitespace-no-wrap mt-4">
+    Purchase Breakdown
+    <Info content="Charts show 90 days of historical spend by category,
+                   with weekly and monthly averages." />
+  </div>
+  <div class="my-2">
+    <PurchaseBreakdown {transactions} />
   </div>
   {/if}
 </div>

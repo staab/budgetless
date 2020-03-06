@@ -69,3 +69,12 @@ export const colors = {
 }
 
 export const rgba = (color, opacity = 1) => `rgba(${color.join(',')}, ${opacity})`
+
+export const range = (start, stop, step = 1) => {
+  const r = []
+  for (let i = start; (step > 0 ? i < stop : i > stop); i += step) {
+    r.push(i)
+  }
+
+  return r
+}
