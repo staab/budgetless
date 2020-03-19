@@ -9,7 +9,7 @@
   const plaid = Plaid.create({
     clientName: 'Budgetless',
     countryCodes: ['US'],
-    env: 'sandbox',
+    env: process.env.PLAID_ENVIRONMENT,
     key: process.env.PLAID_PUBLIC_KEY,
     product: ['transactions'],
     onSuccess: async public_token => {
@@ -28,7 +28,6 @@
       loading = true
     }, 1000)
   }
-
 </script>
 
 <Door>
@@ -41,9 +40,14 @@
     we use <strong>Plaid</strong> to import it straight from your bank!
   </p>
   <div class="flex justify-center py-8">
-    <button class="button button-primary" on:click={link}>
-      Connect with Plaid
-    </button>
+    <span class="text-right">
+      <button class="button button-primary" on:click={link}>
+        Connect with Plaid
+      </button>
+      <div class="pt-2">
+        Or, <span class="underline"><Link to="/logout">Log Out</Link></span>
+      </div>
+    </span>
   </div>
   {/if}
 </Door>

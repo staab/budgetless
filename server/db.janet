@@ -40,6 +40,7 @@
   (def k$ (map (fn [[i k]]
                  (string (pq/ident k) "=" (string "$" (inc (+ offset i)))))
                (misc/enumerate ks)))
+  (pp [k$ ks vs data])
   [vs (pq/composite "set" (string/join k$ ","))])
 
 (defn update [tbl data where]
@@ -89,7 +90,7 @@
     `select to_char(
        coalesce(
          max(transaction_date::timestamp - interval '7' day),
-         now() - interval 120' day
+         now() - interval '120' day
         ),
        'yyyy-mm-dd'
      )

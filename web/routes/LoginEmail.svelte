@@ -10,9 +10,8 @@
   const onSubmit = async () => {
     const [e, r] = await fetchJson('post', '/api/send-login-code', {email})
 
-
     if (e) {
-      error = e.detail
+      error = e.data.detail
     } else {
       navigate(`/login/code?email=${email}`)
     }

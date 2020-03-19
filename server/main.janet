@@ -52,7 +52,7 @@
   (def start-date (db/get-sync-start-date account-id))
   (def limit 100)
   (var offset 0)
-  (var done? false)
+  (var done? (nil? token))
   (defn sync-transactions [offset]
     (let [payload {:access_token token
                    :start_date start-date
@@ -100,13 +100,15 @@
 (defn api/link [req]
   (if-let [session (get-current-session req)
            path "/item/public_token/exchange"
-           {:access_token token :item_id item-id} (plaid/post path (req :json))]
+           res (plaid/post path (req :json))]
     (do
+      (when-let [e (res :error_message)] (error e))
       (db/update
         :account
-        {:plaid_access_token token :plaid_item_id item-id}
+        {:plaid_access_token (res :access_token)
+         :plaid_item_id (res :item_id)}
         {:id (pq/uuid (session :account))})
-      (ok-json {:plaid_item_id item-id}))
+      (ok-json {:plaid_item_id (res :item_id)}))
     (bad 401 {:detail "No session found"})))
 
 (defn api/log-error [req]
@@ -140,7 +142,7 @@
           [:id :email :plaid_item_id :balance]
           (db/get-account (account :id)))
         {"Set-Cookie" (string "session=" session-key)}))
-    (bad 400 {:detail "No account was found for that email address."})))
+    (bad 400 {:detail "Code is invalid, please try again."})))
 
 (defn api/logout [req]
   (when-let [session-key (get-cookie req "session")]

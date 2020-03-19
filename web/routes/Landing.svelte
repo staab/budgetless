@@ -1,6 +1,10 @@
 <script>
   import {Link} from "svelte-routing"
   import Footer from "partials/Footer.svelte"
+  import {falseThenTrue} from 'util/state'
+  import {fadeUp} from 'util/transitions'
+
+  const visible = falseThenTrue()
 </script>
 
 <style>
@@ -19,21 +23,25 @@
   <h1 class="text-4xl font-semibold text-gray-800 leading-none">
     Welcome to <span class="underline">Budgetless</span>
   </h1>
-  <h4 class="text-xl text-gray-800 mb-10">
+  {#if $visible}
+  <h4 class="text-xl text-gray-800 mb-10" in:fadeUp="{{delay: 600}}">
     effortless personal finance
   </h4>
-  <Link to="/signup">
-    <button class="rounded bg-teal-300 border-2 border-teal-200
-                   border-solid mb-2 px-6 py-3 text-white p-4 font-semibold
-                   text-2xl hover:bg-teal-400 shadow-lg">
-      Get Started
-    </button>
-  </Link>
-  <div>
+  <div in:fadeUp="{{delay: 1200}}">
+    <Link to="/signup">
+      <button class="rounded bg-teal-300 border-2 border-teal-200
+                     border-solid mb-2 px-6 py-3 text-white p-4 font-semibold
+                     text-2xl hover:bg-teal-400 shadow-lg">
+        Get Started
+      </button>
+    </Link>
+  </div>
+  <div in:fadeUp="{{delay: 2100, duration: 1200}}">
     Or, <span class="text-teal-400 underline">
       <Link to="/login/email">Log In</Link>
     </span>
   </div>
+  {/if}
 </div>
 <div class="h-1 bg-gradient-2" />
 <div class="pt-12 pb-4 bg-gray-800 text-white karla">

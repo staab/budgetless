@@ -26,7 +26,7 @@
     loading = false
 
     if (e) {
-      error = e.detail
+      error = e.data.detail
     } else {
       user.set(r.data)
 

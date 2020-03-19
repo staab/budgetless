@@ -56,6 +56,7 @@ export default {
     	process: JSON.stringify({
       	env: {
           PLAID_PUBLIC_KEY: process.env.PLAID_PUBLIC_KEY,
+          PLAID_ENVIRONMENT: process.env.PLAID_ENVIRONMENT,
       	},
     	}),
   	}),

@@ -1,4 +1,6 @@
-export const fetchJson = async(method, url, body) => {
+export const noop = () => null
+
+export const fetchJson = async (method, url, body) => {
   const opts = {method}
 
   if (body) {
@@ -15,9 +17,7 @@ export const fetchJson = async(method, url, body) => {
   if (res.status >= 500) {
     logError(res.statusText)
 
-    return [null, {
-      detail: "Oops! Something went wrong, please try again."
-    }]
+    return [{detail: "Oops! Something went wrong, please try again."}, null]
   }
 
   const result = {status: res.status, data: await res.json()}
@@ -78,3 +78,4 @@ export const range = (start, stop, step = 1) => {
 
   return r
 }
+
