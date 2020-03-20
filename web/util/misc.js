@@ -79,3 +79,21 @@ export const range = (start, stop, step = 1) => {
   return r
 }
 
+
+
+export const polarToCartesian = (cx, cy, r, deg) => {
+  const rad = (deg - 90) * Math.PI / 180.0
+
+  return {
+    x: cx + r * Math.cos(rad),
+    y: cy + r * Math.sin(rad),
+  }
+}
+
+export const arc = (x, y, r, startAngle, endAngle) => {
+  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1"
+  const start = polarToCartesian(x, y, r, endAngle)
+  const end = polarToCartesian(x, y, r, startAngle)
+
+  return ["M", start.x, start.y, "A", r, r, 0, largeArcFlag, 0, end.x, end.y].join(" ")
+}

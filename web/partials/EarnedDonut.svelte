@@ -2,10 +2,10 @@
  import Chart from 'chart.js'
   import {onMount} from 'svelte'
   import {DateTime} from 'luxon'
-  import {dollars} from 'util/misc'
+  import {dollars, arc} from 'util/misc'
 
   export let transactions = []
-  let canvas
+  let chart, width, height
 
   const back35 = DateTime.local().minus({days: 35})
   const back70 = DateTime.local().minus({days: 70})
@@ -25,28 +25,15 @@
     .reduce((result, {amount}) => result - amount, 0)
 
   const color = thisPeriod > lastPeriod ? '#81E6D9' : '#FC8181'
-  const data = thisPeriod > lastPeriod
-    ? [thisPeriod, lastPeriod]
-    : [lastPeriod, thisPeriod]
+  const ratio = thisPeriod > lastPeriod
+    ? Math.min(0.99999, (thisPeriod - lastPeriod) / lastPeriod)
+    : thisPeriod / lastPeriod
 
   onMount(() => {
-    new Chart(canvas, {
-      type: 'doughnut',
-      data: {
-        datasets: [{
-          data,
-          borderWidth: 0,
-          backgroundColor: [color, '#EDF2F7'],
-          hoverBackgroundColor: [color, '#EDF2F7'],
-        }],
-      },
-      options: {
-        tooltips: {
-          enabled: false,
-        },
-        cutoutPercentage: 95,
-      },
-    })
+    const rect = chart.getBoundingClientRect()
+
+    width = rect.width
+    height = rect.height
   })
 </script>
 
@@ -60,7 +47,12 @@
   }
 </style>
 
-<canvas bind:this={canvas} />
+<div bind:this={chart}>
+  <svg {width} {height} xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 1200 1200">
+    <path d="{arc(500, 500, 500, 0, 359.99)}" stroke="#EDF2F7" stroke-width="25" fill="transparent" />
+    <path d="{arc(500, 500, 500, 0, ratio * 360)}" stroke="{color}" stroke-width="25" fill="transparent" />
+  </svg>
+</div>
 <div class="absolute inset-0 flex flex-col justify-center align-center">
   <span class="title text-center text-3xl">{dollars(thisPeriod)}</span>
   <span class="subtitle text-center w-1/3 text-sm mx-auto">Earned in the last 35 days</span>

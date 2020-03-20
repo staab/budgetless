@@ -35,12 +35,12 @@
     <h2 class="text-lg mt-12">Loading...</h2>
   </div>
   {:else}
-  <div class="relative mb-8 h-32">
-    <div class="absolute -mx-20 left-0">
-      <SpentDonut {transactions} />
-    </div>
-    <div class="absolute -mx-20 right-0">
+  <div class="flex">
+    <div class="w-1/2 relative">
       <EarnedDonut {transactions} />
+    </div>
+    <div class="w-1/2 relative">
+      <SpentDonut {transactions} />
     </div>
   </div>
   <div class="flex text-2xl mt-4">
