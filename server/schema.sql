@@ -26,7 +26,6 @@ create table if not exists transaction (
   transaction_type text not null,
   payment_channel text not null,
   amount integer not null,
-  pending boolean not null,
   categories jsonb not null,
   plaid_transaction_id text not null unique,
   plaid_account_id text not null,

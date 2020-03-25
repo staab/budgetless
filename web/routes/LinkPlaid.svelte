@@ -3,6 +3,7 @@
   import {fetchJson} from 'util/misc'
   import {user} from 'util/state'
   import Door from 'partials/Door'
+  import ExternalLink from 'partials/ExternalLink'
 
   let loading = false
 
@@ -37,7 +38,8 @@
   <h2 class="text-2xl my-2">Let's get started</h2>
   <p class="my-1">
     To avoid the tedious work of keeping your spending history up-to-date,
-    we use <strong>Plaid</strong> to import it straight from your bank!
+    we use <ExternalLink href="https://plaid.com/" color="teal-300">Plaid</ExternalLink> to
+    import it straight from your bank!
   </p>
   <div class="flex justify-center py-8">
     <span class="text-right">

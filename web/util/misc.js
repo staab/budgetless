@@ -97,3 +97,8 @@ export const arc = (x, y, r, startAngle, endAngle) => {
 
   return ["M", start.x, start.y, "A", r, r, 0, largeArcFlag, 0, end.x, end.y].join(" ")
 }
+
+export const sum = xs => xs.reduce((a, b) => a + b, 0)
+
+export const avg = xs => sum(xs) / xs.length
+

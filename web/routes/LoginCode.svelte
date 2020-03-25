@@ -48,7 +48,9 @@
         name="code"
         type="string"
         class="input w-full max-w-sm"
+        class:bg-gray-300={loading}
         placeholder="Login Code"
+        disabled={loading}
         bind:value={login_code} />
     </div>
     {#if error}

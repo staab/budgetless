@@ -60,7 +60,7 @@
                    :options {:count limit :offset offset}}
           res (plaid/post "/transactions/get" payload)]
       (when-let [e (res :error_message)] (error e))
-      (each txn (res :transactions)
+      (each txn (filter |(not ($ :pending)) (res :transactions))
         (db/insert-or-update
           :transaction
           :plaid_transaction_id
@@ -71,7 +71,6 @@
            :transaction_type (txn :transaction_type)
            :payment_channel (txn :payment_channel)
            :amount (* 100 (txn :amount))
-           :pending (txn :pending)
            :categories (pq/jsonb (txn :category))
            :plaid_transaction_id (txn :transaction_id)
            :plaid_account_id (txn :account_id)

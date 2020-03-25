@@ -1,11 +1,10 @@
 <script>
-  import Chart from 'chart.js'
   import {onMount} from 'svelte'
   import {DateTime} from 'luxon'
-  import {dollars, colors, rgba, scaleBetween, add, dollarsk, last} from 'util/misc'
+  import {dollars, sum, avg, colors, rgba, scaleBetween, add, dollarsk, last} from 'util/misc'
 
   export let transactions
-  let canvas
+  let chart, bbox, points = []
 
   const back60 = DateTime.local().minus({days: 60})
 
@@ -29,66 +28,89 @@
       {}
     )
 
+  const colorValues = Object.values(colors)
+
   const totalInPeriod = transactionsInPeriod
     .reduce((r, {amount}) => r + amount, 0)
 
-  const min = Object.values(transactionsByCategory)
-    .reduce((r, amounts) => Math.min(r, amounts.reduce(add, 0)), Infinity)
-
-  const max = Object.values(transactionsByCategory)
-    .reduce((r, amounts) => Math.max(r, amounts.reduce(add, 0)), 0)
-
-  const colorValues = Object.values(colors)
-
-  const datasets = categories
-    .sort((a, b) => (
-      transactionsByCategory[b].reduce(add, 0)
-      - transactionsByCategory[a].reduce(add, 0)
-    ))
+  const data = categories
+    .sort((a, b) => sum(transactionsByCategory[b]) - sum(transactionsByCategory[a]))
     .slice(0, colorValues.length - 1)
-    .map((label, idx) => {
-      const amounts = transactionsByCategory[label]
-      const total = amounts.reduce(add, 0)
+    .map((label, idx) => ({label, idx, amounts: transactionsByCategory[label]}))
+
+  const minX = data.reduce((r, {amounts}) => Math.min(r, amounts.length), Infinity)
+  const maxX = data.reduce((r, {amounts}) => Math.max(r, amounts.length), 0)
+  const minY = data.reduce((r, {amounts}) => Math.min(r, sum(amounts)), Infinity)
+  const maxY = data.reduce((r, {amounts}) => Math.max(r, sum(amounts)), 0)
+
+  onMount(() => {
+    const rect = chart.getBoundingClientRect()
+
+    bbox = {
+      w: rect.width,
+      h: rect.width / 1.62,
+      vw: rect.width,
+      vh: minY * ((rect.width / 1.62) / maxY),
+    }
+
+    console.log(bbox, maxY, minY)
+
+    points = data.map(({label, amounts}, idx) => {
+      const maxR = bbox.h / 10
+
+      console.log(avg(amounts), maxR, bbox.h - maxR, minY, maxY, scaleBetween(avg(amounts), maxR, bbox.h - maxR, minY, maxY))
 
       return {
         label,
-        data: [{x: amounts.length, y: total}],
-        pointRadius: scaleBetween(total, 2, 12, min, max),
-        borderColor: rgba(colorValues[idx]),
-        backgroundColor: rgba(colorValues[idx]),
+        x: scaleBetween(amounts.length, maxR, bbox.w - maxR, minX, maxX),
+        y: scaleBetween(avg(amounts), maxR, bbox.h - maxR, minY, maxY),
+        r: scaleBetween(sum(amounts), 4, maxR, minY, maxY),
       }
     })
-
-  onMount(() => {
-    const chart = Chart.Scatter(canvas, {
-      data: {
-        datasets,
-      },
-      options: {
-        scales: {
-          xAxes: [{
-            gridLines: {
-              drawOnChartArea: false,
-            },
-            ticks: {
-              maxTicksLimit: 4,
-              maxRotation: 0,
-              minRotation: 0,
-            },
-          }],
-          yAxes: [{
-            gridLines: {
-              drawOnChartArea: false,
-            },
-            ticks: {
-              maxTicksLimit: 4,
-              callback: dollars
-            },
-          }],
-        },
-      },
-    })
   })
+
+  //  onMount(() => {
+  //    const chart = Chart.Scatter(canvas, {
+  //      data: {
+  //        datasets,
+  //      },
+  //      options: {
+  //        scales: {
+  //          xAxes: [{
+  //            gridLines: {
+  //              drawOnChartArea: false,
+  //            },
+  //            ticks: {
+  //              maxTicksLimit: 4,
+  //              maxRotation: 0,
+  //              minRotation: 0,
+  //            },
+  //          }],
+  //          yAxes: [{
+  //            gridLines: {
+  //              drawOnChartArea: false,
+  //            },
+  //            ticks: {
+  //              maxTicksLimit: 4,
+  //              callback: dollars
+  //            },
+  //          }],
+  //        },
+  //      },
+  //    })
+  //  })
 </script>
 
-<canvas bind:this={canvas} />
+<div bind:this={chart}>
+  {#if bbox}
+  <svg
+    width={bbox.w}
+    height={bbox.h}
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 {bbox.vw} {bbox.vh}">
+    {#each points as point, i}
+    <circle cx="{point.x}" cy="{point.y}" r="{point.r}" fill="{rgba(colorValues[i])}" />
+    {/each}
+  </svg>
+  {/if}
+</div>

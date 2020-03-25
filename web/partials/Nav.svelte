@@ -30,13 +30,13 @@
 <nav
   class="secondary-nav fixed h-full bg-gray-800 flex flex-col text-white text-xl"
   class:open>
-  <span class="cursor-pointer p-2 pl-4 pr-12 hover:bg-gray-900">
-    <Link to="/dashboard">Dashboard</Link>
-  </span>
-  <span class="cursor-pointer p-2 pl-4 pr-12 hover:bg-gray-900">
-    <Link to="/account">Account</Link>
-  </span>
-  <span class="cursor-pointer p-2 pl-4 pr-12 hover:bg-gray-900">
-    <Link to="/logout">Log Out</Link>
-  </span>
+  <Link to="/logout">
+    <span class="cursor-pointer p-2 pl-4 pr-12 hover:bg-gray-900">Dashboard</span>
+  </Link>
+  <Link to="/logout">
+    <span class="cursor-pointer p-2 pl-4 pr-12 hover:bg-gray-900">Account</span>
+  </Link>
+  <Link to="/logout">
+    <span class="cursor-pointer p-2 pl-4 pr-12 hover:bg-gray-900">Log Out</span>
+  </Link>
 </nav>
