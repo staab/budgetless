@@ -83,9 +83,9 @@
   {/each}
 </div>
 <div class="grid grid-cols-7">
-  <div class="flex flex-col justify-around col-span-1">
+  <div class="flex flex-col justify-around col-span-1 text-right mr-1">
     {#each range(minY, maxY, yStep).reverse() as y}
-      <span class="text-xs text-gray-500">{dollars(y)}/ea</span>
+      <span class="text-xs text-gray-500">{dollars(y)}</span>
     {/each}
   </div>
   <div bind:this={chart} class="col-span-6 border border-solid border-gray-300">

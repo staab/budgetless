@@ -33,7 +33,7 @@ export const logError = e => {
   console.error(e)
 }
 
-export const last = xs => xs.slice(-1)[0]
+export const last = xs => xs[xs.length - 1]
 
 export const add = (a, b) => a + b
 
@@ -76,7 +76,9 @@ export const range = (start, stop, step = 1) => {
     r.push(i)
   }
 
-  r.push(stop)
+  if (last(r) !== stop) {
+    r.push(stop)
+  }
 
   return r
 }
@@ -108,3 +110,5 @@ export const prop = k => o => o[k]
 
 export const pluralize = (value, label, pluralLabel) =>
   value === 1 ? label : (pluralLabel || `${label}s`)
+
+export const equals = (a, b) => JSON.stringify(a) === JSON.stringify(b)

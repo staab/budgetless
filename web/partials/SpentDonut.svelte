@@ -2,7 +2,7 @@
   import Chart from 'chart.js'
   import {onMount} from 'svelte'
   import {DateTime} from 'luxon'
-  import {dollars, arc} from 'util/misc'
+  import {dollars, arc, equals} from 'util/misc'
 
   export let transactions = []
   let chart, width, height
@@ -10,13 +10,16 @@
   const aWeekAgo = DateTime.local().minus({days: 7})
   const twoWeeksAgo = DateTime.local().minus({days: 14})
 
-  const thisWeek = transactions
-    .filter(({transaction_date, amount}) =>
+  const nonTransferTransactions = transactions
+    .filter(({categories}) => !equals(categories, ["Transfer", "Debit"]))
+
+  const thisWeek = nonTransferTransactions
+    .filter(({transaction_date, amount, categories}) =>
       amount > 0 && aWeekAgo < DateTime.fromISO(transaction_date)
     )
     .reduce((result, {amount}) => result + amount, 0)
 
-  const lastWeek = transactions
+  const lastWeek = nonTransferTransactions
     .filter(({transaction_date, amount}) => {
       const dt = DateTime.fromISO(transaction_date)
 

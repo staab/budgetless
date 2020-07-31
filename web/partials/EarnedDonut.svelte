@@ -2,7 +2,7 @@
  import Chart from 'chart.js'
   import {onMount} from 'svelte'
   import {DateTime} from 'luxon'
-  import {dollars, arc} from 'util/misc'
+  import {dollars, arc, equals} from 'util/misc'
 
   export let transactions = []
   let chart, width, height
@@ -10,13 +10,16 @@
   const back35 = DateTime.local().minus({days: 35})
   const back70 = DateTime.local().minus({days: 70})
 
-  const thisPeriod = transactions
+  const nonTransferTransactions = transactions
+    .filter(({categories}) => !equals(categories, ["Transfer", "Credit"]))
+
+  const thisPeriod = nonTransferTransactions
     .filter(({transaction_date, amount}) =>
       amount < 0 && back35 < DateTime.fromISO(transaction_date)
     )
     .reduce((result, {amount}) => result - amount, 0)
 
-  const lastPeriod = transactions
+  const lastPeriod = nonTransferTransactions
     .filter(({transaction_date, amount}) => {
       const dt = DateTime.fromISO(transaction_date)
 

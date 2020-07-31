@@ -2,14 +2,15 @@
   import Chart from 'chart.js'
   import {onMount} from 'svelte'
   import {DateTime} from 'luxon'
-  import {dollars, dollarsk} from 'util/misc'
+  import {range, dollarsk} from 'util/misc'
 
   export let currentBalance
   export let transactions
-  let canvas
+  let chart, bbox
 
-  const back30 = DateTime.local().minus({days: 30})
-  const back60 = DateTime.local().minus({days: 60})
+  const now = DateTime.local()
+  const back30 = now.minus({days: 30})
+  const back60 = now.minus({days: 60})
 
   const transactionsByDate = transactions
     .filter(({transaction_date}) => back60 < DateTime.fromISO(transaction_date))
@@ -23,82 +24,93 @@
     )
 
   let balance = currentBalance
+  let minY = currentBalance
+  let maxY = currentBalance
   const labels = []
-  const thisPeriod = []
-  const prevPeriod = []
-  for (let i = 60; i > 0; i--) {
-    const dtString = DateTime.local().minus({days: i}).toFormat('M/d')
+  const lines = [{
+    label: 'Previous 30 Days',
+    color: '#EDF2F7',
+    data: [],
+  }, {
+    label: 'Last 30 Days',
+    color: '#81E6D9',
+    data: [],
+  }]
+
+  for (let i = 0; i < 60; i++) {
+    const dtString = now.minus({days: i}).toFormat('M/d')
 
     balance += transactionsByDate[dtString] || 0
+    minY = Math.min(balance, minY)
+    maxY = Math.max(balance, maxY)
 
-    if (i > 30) {
-      prevPeriod.push(balance)
+    if (i < 30) {
+      lines[1].data.push(balance)
     } else {
-      thisPeriod.push(balance)
+      lines[0].data.push(balance)
       labels.push(dtString)
     }
   }
 
-  onMount(() => {
-    const chart = new Chart(canvas, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          data: thisPeriod,
-          label: "Last 30 Days",
-          pointRadius: 0,
-          borderColor: '#81E6D9',
-          backgroundColor: '#81E6D9',
-          lineTension: 0,
-          fill: false,
-        }, {
-          data: prevPeriod,
-          label: "Previous 30 Days",
-          pointRadius: 0,
-          borderColor: '#EDF2F7',
-          backgroundColor: '#EDF2F7',
-          lineTension: 0,
-          fill: false,
-        }],
-      },
-      options: {
-        tooltips: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            label: ({datasetIndex, yLabel}, data) => {
-              const {label} = chart.data.datasets[datasetIndex]
-              const value = dollars(yLabel)
+  // Reverse the lines so they're chronologically forward
+  lines.map(line => line.data.reverse())
 
-              return `${label}: ${value}`
-            }
-          }
-        },
-        scales: {
-          xAxes: [{
-            gridLines: {
-              drawOnChartArea: false,
-            },
-            ticks: {
-              maxTicksLimit: 4,
-              maxRotation: 0,
-              minRotation: 0,
-            },
-          }],
-          yAxes: [{
-            gridLines: {
-              drawOnChartArea: false,
-            },
-            ticks: {
-              maxTicksLimit: 4,
-              callback: dollarsk
-            },
-          }],
-        },
-      },
-    })
+  const buildPath = xs => {
+    const xScale = bbox.w / 29
+    const yScale = bbox.h / (maxY - minY)
+
+    return xs.map((v, i) => {
+      const x = i * xScale
+      const y = (maxY - v) * yScale
+
+      return i === 0 ? `M ${x},${y}` : `${x},${y}`
+    }).join(' ')
+  }
+
+  onMount(() => {
+    const rect = chart.getBoundingClientRect()
+
+    bbox = {
+      w: rect.width,
+      h: rect.width / 1.62,
+    }
   })
 </script>
 
-<canvas bind:this={canvas} />
+<div class="-mr-8">
+  {#each lines as line}
+  <span class="inline-block whitespace-no-wrap text-xs">
+    <span
+      style={`background-color: ${line.color}; height: 3px; margin: 3px 0;`}
+      class="inline-block w-4" />
+    <span class="pl-1 pr-2">{line.label}</span>
+  </span>
+  {/each}
+</div>
+<div class="grid grid-cols-7">
+  <div class="flex flex-col justify-between col-span-1 text-right mr-1">
+    {#each range(minY, maxY, (maxY - minY) / 5).reverse() as y}
+      <span class="text-xs text-gray-500">{dollarsk(y)}</span>
+    {/each}
+  </div>
+  <div bind:this={chart} class="col-span-6 border border-solid border-gray-300">
+    {#if bbox}
+    <svg
+      width={bbox.w}
+      height={bbox.h}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 {bbox.w} {bbox.h}">
+      {#each lines as line}
+        <path d={buildPath(line.data)} stroke={line.color} fill="transparent" stroke-width="2px" />
+      {/each}
+    </svg>
+    {/if}
+  </div>
+  <div class="flex justify-between col-span-6 col-start-2">
+    {#each range(0, 30, 6).reverse() as days}
+      <span class="text-xs text-gray-500">
+        {now.minus({days}).toFormat('M/d')}
+      </span>
+    {/each}
+  </div>
+</div>
