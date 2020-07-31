@@ -165,7 +165,8 @@
        (string/split "\n")
        (filter |(string/find "path=" $))
        (map |(in (string/split "\"" $) 1))
-       (map |(tuple (string "/" (if (= "*" $) "" $)) {:file "index.html"}))
+       (map |(tuple (string "/" (if (= "*" $) "" $)) {:body (slurp "index.html")
+                                                      :headers {"Content-Type" "text/html"}}))
        (flatten)
        (apply struct)))
 

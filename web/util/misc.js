@@ -76,10 +76,10 @@ export const range = (start, stop, step = 1) => {
     r.push(i)
   }
 
+  r.push(stop)
+
   return r
 }
-
-
 
 export const polarToCartesian = (cx, cy, r, deg) => {
   const rad = (deg - 90) * Math.PI / 180.0
@@ -102,3 +102,9 @@ export const sum = xs => xs.reduce((a, b) => a + b, 0)
 
 export const avg = xs => sum(xs) / xs.length
 
+export const concat = (a, b) => a.concat(b)
+
+export const prop = k => o => o[k]
+
+export const pluralize = (value, label, pluralLabel) =>
+  value === 1 ? label : (pluralLabel || `${label}s`)

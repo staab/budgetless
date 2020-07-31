@@ -14,7 +14,7 @@
   (if data (buffer " -d '" (json/encode (merge data auth)) "'") ""))
 
 (defn build-cmd [url headers body]
-  (string "curl " url (prep-headers headers) (prep-body body)))
+  (string "curl -s " url (prep-headers headers) (prep-body body)))
 
 (defn request [method path data]
   (let [url (string url path)

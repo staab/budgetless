@@ -1,7 +1,10 @@
 <script>
   import {onMount} from 'svelte'
   import {DateTime} from 'luxon'
-  import {dollars, sum, avg, colors, rgba, scaleBetween, add, dollarsk, last} from 'util/misc'
+  import {
+    dollars, sum, avg, colors, rgba, scaleBetween, add, dollarsk, last,
+    range, concat, prop, pluralize,
+  } from 'util/misc'
 
   export let transactions
   let chart, bbox, points = []
@@ -40,8 +43,12 @@
 
   const minX = data.reduce((r, {amounts}) => Math.min(r, amounts.length), Infinity)
   const maxX = data.reduce((r, {amounts}) => Math.max(r, amounts.length), 0)
-  const minY = data.reduce((r, {amounts}) => Math.min(r, sum(amounts)), Infinity)
-  const maxY = data.reduce((r, {amounts}) => Math.max(r, sum(amounts)), 0)
+  const minY = data.reduce((r, {amounts}) => Math.min(r, avg(amounts)), Infinity)
+  const maxY = data.reduce((r, {amounts}) => Math.max(r, avg(amounts)), 0)
+  const minSum = data.reduce((r, {amounts}) => Math.min(r, sum(amounts)), Infinity)
+  const maxSum = data.reduce((r, {amounts}) => Math.max(r, sum(amounts)), 0)
+  const xStep = (maxX - minX) / 3
+  const yStep = (maxY - minY) / 3
 
   onMount(() => {
     const rect = chart.getBoundingClientRect()
@@ -49,68 +56,56 @@
     bbox = {
       w: rect.width,
       h: rect.width / 1.62,
-      vw: rect.width,
-      vh: minY * ((rect.width / 1.62) / maxY),
     }
 
-    console.log(bbox, maxY, minY)
-
     points = data.map(({label, amounts}, idx) => {
-      const maxR = bbox.h / 10
-
-      console.log(avg(amounts), maxR, bbox.h - maxR, minY, maxY, scaleBetween(avg(amounts), maxR, bbox.h - maxR, minY, maxY))
+      const maxR = bbox.h / 8
 
       return {
         label,
+        color: rgba(colorValues[idx]),
         x: scaleBetween(amounts.length, maxR, bbox.w - maxR, minX, maxX),
-        y: scaleBetween(avg(amounts), maxR, bbox.h - maxR, minY, maxY),
-        r: scaleBetween(sum(amounts), 4, maxR, minY, maxY),
+        y: scaleBetween(maxY - avg(amounts) + minY, maxR, bbox.h - maxR, minY, maxY),
+        r: scaleBetween(sum(amounts), maxR / 3, maxR - 1, minSum, maxSum),
       }
     })
   })
-
-  //  onMount(() => {
-  //    const chart = Chart.Scatter(canvas, {
-  //      data: {
-  //        datasets,
-  //      },
-  //      options: {
-  //        scales: {
-  //          xAxes: [{
-  //            gridLines: {
-  //              drawOnChartArea: false,
-  //            },
-  //            ticks: {
-  //              maxTicksLimit: 4,
-  //              maxRotation: 0,
-  //              minRotation: 0,
-  //            },
-  //          }],
-  //          yAxes: [{
-  //            gridLines: {
-  //              drawOnChartArea: false,
-  //            },
-  //            ticks: {
-  //              maxTicksLimit: 4,
-  //              callback: dollars
-  //            },
-  //          }],
-  //        },
-  //      },
-  //    })
-  //  })
 </script>
 
-<div bind:this={chart}>
-  {#if bbox}
-  <svg
-    width={bbox.w}
-    height={bbox.h}
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 {bbox.vw} {bbox.vh}">
-    {#each points as point, i}
-    <circle cx="{point.x}" cy="{point.y}" r="{point.r}" fill="{rgba(colorValues[i])}" />
+<div class="-mr-8">
+  {#each points as point}
+  <span class="inline-block whitespace-no-wrap text-xs">
+    <span
+      style={`background-color: ${point.color}; height: 3px; margin: 3px 0;`}
+      class="inline-block w-4" />
+    <span class="pl-1 pr-2">{point.label}</span>
+  </span>
+  {/each}
+</div>
+<div class="grid grid-cols-7">
+  <div class="flex flex-col justify-around col-span-1">
+    {#each range(minY, maxY, yStep).reverse() as y}
+      <span class="text-xs text-gray-500">{dollars(y)}/ea</span>
     {/each}
-  </svg>
-  {/if}
+  </div>
+  <div bind:this={chart} class="col-span-6 border border-solid border-gray-300">
+    {#if bbox}
+    <svg
+      width={bbox.w}
+      height={bbox.h}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 {bbox.w} {bbox.h}">
+      {#each points as point}
+      <circle cx="{point.x}" cy="{point.y}" r="{point.r}" fill="{point.color}" />
+      {/each}
+    </svg>
+    {/if}
+  </div>
+  <div class="flex justify-between col-span-6 col-start-2">
+    {#each range(minX, maxX, xStep) as y}
+      <span class="text-xs text-gray-500">
+        {Math.round(y)} {pluralize(y, 'purchase')}
+      </span>
+    {/each}
+  </div>
 </div>
