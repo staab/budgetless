@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export $(cat env.local | grep -v '#')
+export $(cat .env | grep -v '#')
 
 npx rollup -c -w &
 

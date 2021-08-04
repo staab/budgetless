@@ -3,8 +3,8 @@
 (import util/pq)
 (import util/ct)
 (import util/misc)
-(import server/db)
-(import server/plaid)
+(import /server/db)
+(import /server/plaid)
 
 (def ADMIN_EMAIL "shtaab@gmail.com")
 
