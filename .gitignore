@@ -1,7 +1,7 @@
 build
 env.local
 node_modules
-public
+public/bundle.*
 lib
 .npm
 .bash_history
