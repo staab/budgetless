@@ -1,0 +1,71 @@
+html, body {
+  font-size: 1.1rem;
+}
+
+html, body, .rajdhani {
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.karla {
+  font-family: 'Karla', sans-serif;
+}
+
+.bg-gradient-1 {
+  background: linear-gradient(182.81deg, #94CBFF 13.83%, #E9D8FD 86.17%);
+}
+
+.bg-gradient-2 {
+  background: linear-gradient(2.81deg, #94CBFF 13.83%, #E9D8FD 86.17%);
+}
+
+.form-row {
+  margin: 0.5rem 0;
+}
+
+.input {
+  padding: 0.25rem 0.5rem;
+  border-bottom: 2px solid #E2E8F0;
+  color: #2D3748;
+}
+
+.link, a {
+  cursor: pointer;
+  outline: none;
+}
+
+.button {
+  color: #2D3748;
+  background-color: white;
+  padding: 0.25rem 2rem;
+  font-size: 1.25rem;
+  transition-property: background-color, opacity;
+  transition-duration: 300ms;
+  outline: none;
+  border-radius: 3px;
+  opacity: 1;
+}
+
+.button[disabled] {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.button:hover {
+  background-color: #eee;
+}
+
+.button.button-primary {
+  background-color: #B2F5EA;
+}
+
+.button.button-primary:hover {
+  background-color: #81E6D9;
+}
+
+.button.button-secondary {
+  background-color: #E9D8FD;
+}
+
+.button.button-secondary:hover {
+  background-color: #D6BCFA;
+}
