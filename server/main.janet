@@ -50,6 +50,7 @@
 
 (defn sync-plaid [{:plaid_access_token token :id account-id}]
   (def start-date (db/get-sync-start-date account-id))
+  (pp start-date)
   (def limit 100)
   (var offset 0)
   (var done? (nil? token))
@@ -90,10 +91,11 @@
                          (* 100))}
           {:id (pq/uuid account-id)})))))
 
-
 (defn api/dashboard [req]
   (if-let [account (get-current-account req)]
-    (ok-json {:transactions (db/get-transactions (account :id))})
+    (do
+      (sync-plaid account)
+      (ok-json {:transactions (db/get-transactions (account :id))}))
     (bad 401 {:detail "No session found"})))
 
 (defn api/link [req]
@@ -134,13 +136,11 @@
            code (get-in req [:json :login_code])
            account (db/get-account-by-code email code)
            session-key (db/create-session (account :id))]
-    (do
-      (sync-plaid account)
-      (ok-json
-        (misc/pick
-          [:id :email :plaid_item_id :balance]
-          (db/get-account (account :id)))
-        {"Set-Cookie" (string "session=" session-key)}))
+    (ok-json
+      (misc/pick
+        [:id :email :plaid_item_id :balance]
+        (db/get-account (account :id)))
+      {"Set-Cookie" (string "session=" session-key)})
     (bad 400 {:detail "Code is invalid, please try again."})))
 
 (defn api/logout [req]

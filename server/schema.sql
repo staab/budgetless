@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 create table if not exists account (
   id uuid primary key,
   created timestamp not null default now(),

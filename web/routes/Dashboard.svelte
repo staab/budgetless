@@ -29,7 +29,7 @@
 </script>
 
 <Nav />
-<div class="flex flex-col max-w-sm m-auto p-4">
+<div class="flex flex-col max-w-lg m-auto p-4">
   {#if loading}
   <div class="w-full flex justify-center">
     <h2 class="text-lg mt-12">Loading...</h2>

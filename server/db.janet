@@ -40,7 +40,6 @@
   (def k$ (map (fn [[i k]]
                  (string (pq/ident k) "=" (string "$" (inc (+ offset i)))))
                (misc/enumerate ks)))
-  (pp [k$ ks vs data])
   [vs (pq/composite "set" (string/join k$ ","))])
 
 (defn update [tbl data where]

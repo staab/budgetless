@@ -51,27 +51,32 @@
   const yStep = (maxY - minY) / 3
 
   onMount(() => {
-    const rect = chart.getBoundingClientRect()
+    if (chart) {
+      const rect = chart.getBoundingClientRect()
 
-    bbox = {
-      w: rect.width,
-      h: rect.width / 1.62,
-    }
-
-    points = data.map(({label, amounts}, idx) => {
-      const maxR = bbox.h / 8
-
-      return {
-        label,
-        color: rgba(colorValues[idx]),
-        x: scaleBetween(amounts.length, maxR, bbox.w - maxR, minX, maxX),
-        y: scaleBetween(maxY - avg(amounts) + minY, maxR, bbox.h - maxR, minY, maxY),
-        r: scaleBetween(sum(amounts), maxR / 3, maxR - 1, minSum, maxSum),
+      bbox = {
+        w: rect.width,
+        h: rect.width / 1.62,
       }
-    })
+
+      points = data.map(({label, amounts}, idx) => {
+        const maxR = bbox.h / 8
+
+        return {
+          label,
+          color: rgba(colorValues[idx]),
+          x: scaleBetween(amounts.length, maxR, bbox.w - maxR, minX, maxX),
+          y: scaleBetween(maxY - avg(amounts) + minY, maxR, bbox.h - maxR, minY, maxY),
+          r: scaleBetween(sum(amounts), maxR / 3, maxR - 1, minSum, maxSum),
+        }
+      })
+    }
   })
 </script>
 
+{#if maxY === 0}
+<small>No data found.</small>
+{:else}
 <div class="-mr-8">
   {#each points as point}
   <span class="inline-block whitespace-no-wrap text-xs">
@@ -109,3 +114,4 @@
     {/each}
   </div>
 </div>
+{/if}

@@ -54,7 +54,7 @@
 <div bind:this={chart}>
   <svg {width} {height} xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 1200 1200">
     <path d="{arc(500, 500, 500, 0, 359.99)}" stroke="#EDF2F7" stroke-width="25" fill="transparent" />
-    <path d="{arc(500, 500, 500, 0, ratio * 360)}" stroke="{color}" stroke-width="25" fill="transparent" />
+    <path d="{arc(500, 500, 500, 0, (ratio || 0) * 360)}" stroke="{color}" stroke-width="25" fill="transparent" />
   </svg>
 </div>
 <div class="absolute inset-0 flex flex-col justify-center align-center">

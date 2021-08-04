@@ -61,22 +61,27 @@
 
     return xs.map((v, i) => {
       const x = i * xScale
-      const y = (maxY - v) * yScale
+      const y = (maxY - v) * yScale || 0
 
       return i === 0 ? `M ${x},${y}` : `${x},${y}`
     }).join(' ')
   }
 
   onMount(() => {
-    const rect = chart.getBoundingClientRect()
+    if (chart) {
+      const rect = chart.getBoundingClientRect()
 
-    bbox = {
-      w: rect.width,
-      h: rect.width / 1.62,
+      bbox = {
+        w: rect.width,
+        h: rect.width / 1.62,
+      }
     }
   })
 </script>
 
+{#if maxY === 0}
+<small>No data found.</small>
+{:else}
 <div class="-mr-8">
   {#each lines as line}
   <span class="inline-block whitespace-no-wrap text-xs">
@@ -114,3 +119,4 @@
     {/each}
   </div>
 </div>
+{/if}

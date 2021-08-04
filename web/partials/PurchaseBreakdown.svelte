@@ -54,7 +54,7 @@
 
       const getInterpolatedAverages = (max, step) => {
         // Get our weekly/monthly data first
-        let data = range(0, max, step).map(day => {
+        const data = range(0, max, step).map(day => {
           let n = 0
           const end = day + step - 1
           for (let i = day; i < end; i++) {
@@ -79,7 +79,7 @@
           }
         }
 
-        return interpolated
+        return interpolated.reverse().slice(max - days.length)
       }
 
       new Chart(canvases[category], {
@@ -114,6 +114,9 @@
           legend: {
             display: false,
           },
+          tooltips: {
+            enabled: false,
+          },
           scales: {
             xAxes: [{
               gridLines: {
@@ -142,12 +145,10 @@
 </script>
 
 {#each sortedCategories as category}
-  <div class="flex">
-    <div class="w-1/3">
-      <h3>{category}</h3>
-    </div>
-    <div class="w-2/3">
-      <canvas bind:this={canvases[category]} />
-    </div>
+  <div class="mt-8">
+    <h3 class="mb-4">{category}</h3>
+    <canvas bind:this={canvases[category]} />
   </div>
+{:else}
+<small>No data found.</small>
 {/each}
