@@ -98,3 +98,4 @@
 
 (defn get-transactions [account-id]
   (select pq/all :transaction {:account (pq/uuid account-id)}))
+

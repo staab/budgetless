@@ -19,7 +19,6 @@
 (defn request [method path data]
   (let [url (string url path)
         headers {"Content-Type" ct/json}]
-    (print (build-cmd url headers data))
     (with [f (file/popen (build-cmd url headers data))]
       (json/decode (file/read f :all) true true))))
 
