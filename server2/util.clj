@@ -1,10 +1,12 @@
 (ns server2.util
   (:require [clojure.data.json :as json]))
 
-(defn ok [ct body & headers]
-  {:status 200
-   :headers (merge (or headers {}) {"Content-Type" ct})
-   :body body})
+(defn ok
+  ([ct body] (ok ct body {}))
+  ([ct body headers]
+   {:status 200
+    :headers (merge (or headers {}) {"Content-Type" ct})
+    :body body}))
 
 (defn bad [status-code body]
   {:status status-code

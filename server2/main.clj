@@ -12,6 +12,13 @@
                        (ok "text/html" (slurp "index.html"))))
        (apply merge)))
 
+(defn handle-errors [route req]
+  (try
+   (route req)
+   (catch Exception e
+          (println e)
+          (bad 500 {:detail "Internal Server Error"}))))
+
 (defn app [{:keys [uri query-string] :as req}]
   (if (.contains uri "..")
     (bad 404 {:detail "Not found"})
@@ -19,7 +26,7 @@
       (or
        (get client-routes uri)
        (case head
-        "api" (api/root req)
+        "api" (handle-errors api/root req)
         "public" (ok (slurp (str "." uri)))
         "node_modules" (ok (slurp (str "." uri)))
         :else (bad 404 {:detail "Not found"}))))))
