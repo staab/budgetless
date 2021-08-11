@@ -5,3 +5,4 @@ public/bundle.*
 lib
 .npm
 .bash_history
+.cpcache
