@@ -27,8 +27,8 @@
        (get client-routes uri)
        (case head
         "api" (handle-errors api/root req)
-        "public" (ok (slurp (str "." uri)))
-        "node_modules" (ok (slurp (str "." uri)))
+        "public" (ok "" (slurp (str "." uri)))
+        "node_modules" (ok "" (slurp (str "." uri)))
         :else (bad 404 {:detail "Not found"}))))))
 
 (defn start-server []

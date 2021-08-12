@@ -2,6 +2,7 @@
   (:require [clojure.data.json :as json]
             [clojure.string :as s]
             [server2.util :refer [ok bad]]
+            [server2.plaid :as plaid]
             [server2.db :as db]))
 
 ;; Utils
@@ -20,56 +21,12 @@
  (println [(str "Fake email to " to " using template " template) data]))
 
 (defn get-cookie [req k]
-  (if-let [cookie-str (get-in req [:headers "cookie"])]
-    (get (apply hash-map (s/split cookie-str #"[=; ]+")) k)
-    nil))
+  (when-let [cookie-str (get-in req [:headers "cookie"])]
+    (last (re-find (re-pattern (str k "=([^;]+);")) cookie-str))))
 
 (defn get-email-from-req [req]
   (when-let [email (get (read-json req) "email")]
     (if (.contains email "@") email nil)))
-
-
-;;  (defn sync-plaid [{:plaid_access_token token :id account-id}]
-;;    (def start-date (db/get-sync-start-date account-id))
-;;    (def limit 100)
-;;    (var offset 0)
-;;    (var done? (nil? token))
-;;    (defn sync-transactions [offset]
-;;      (let [payload {:access_token token
-;;                     :start_date start-date
-;;                     :end_date (db/date "now()")
-;;                     :options {:count limit :offset offset}}
-;;            res (plaid/post "/transactions/get" payload)]
-;;        (when-let [e (res :error_message)] (error e))
-;;        (each txn (filter |(not ($ :pending)) (res :transactions))
-;;          (db/insert-or-update
-;;            :transaction
-;;            :plaid_transaction_id
-;;            {:account (pq/uuid account-id)
-;;             :transaction_date (pq/date (txn :date))
-;;             :authorized_date (pq/date (txn :authorized_date))
-;;             :name (txn :name)
-;;             :transaction_type (txn :transaction_type)
-;;             :payment_channel (txn :payment_channel)
-;;             :amount (* 100 (txn :amount))
-;;             :categories (pq/jsonb (txn :category))
-;;             :plaid_transaction_id (txn :transaction_id)
-;;             :plaid_account_id (txn :account_id)
-;;             :plaid_category_id (txn :category_id)}))
-;;        [(res :accounts) (res :total_transactions)]))
-;;    (while (not done?)
-;;      (let [[accounts total] (sync-transactions offset)]
-;;        (set offset (+ limit offset))
-;;        (set done? (<= total offset))
-;;        (when done?
-;;          (db/update
-;;            :account
-;;            {:balance (->> accounts
-;;                           (map |(get-in $ [:balances :available]))
-;;                           (filter identity)
-;;                           (reduce + 0)
-;;                           (* 100))}
-;;            {:id (pq/uuid account-id)})))))
 
 ;; Routes
 
@@ -81,14 +38,13 @@
 (defn dashboard [req]
   (if-let [account (db/get-current-account (get-cookie req "session"))]
     (do
-      ;;  (sync-plaid account)
+      (plaid/sync-account account)
       (ok-json {:transactions (db/get-transactions (account :id))}))
     (bad 401 {:detail "No session found"})))
 
 (defn link [req]
   (if-let [session (db/get-current-session (get-cookie req "session"))]
-   (let [path "/item/public_token/exchange"
-         {:keys [access_token item_id error_message]} {}] ;(plaid/post path (req :json))
+   (let [{:keys [access_token item_id error_message]} (plaid/exchange-token (req :json))]
     (when error_message (throw error_message))
     (db/link-account (:account session) access_token item_id)
     (ok-json {:plaid_item_id item_id}))

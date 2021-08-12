@@ -1,10 +1,15 @@
 (ns server2.db
-  (:require [clojure.java.jdbc :as j]))
+  (:require [clojure.java.jdbc :as j]
+            [clojure.string :as s]))
 
-(def url (str (System/getenv "DATABASE_URL")
-              "?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"))
+(def url (System/getenv "JDBC_DATABASE_URL"))
 
 (def db {:connection-uri url})
+
+(defn date [s]
+  (:d
+   (first
+    (j/query db ["select to_char(?, 'yyyy-mm-dd') as d" s]))))
 
 (defn get-account [id]
   (j/get-by-id db :account id))
@@ -70,3 +75,18 @@
 (defn delete-session [session-key]
   (j/delete! db :session ["key = ?" session-key]))
 
+(defn save-transactions [transactions]
+  (let [ks [:account, :transaction_date, :authorized_date, :name, :transaction_type,
+            :payment_channel, :amount, :categories, :plaid_transaction_id, :plaid_account_id,
+            :plaid_category_id]
+        columns (s/join ", " (map name ks))
+        updates (s/join ", " (map #(str (name ks) " = ?") ks))]
+    (for [txn transactions]
+      (j/query db
+       [(str
+         "insert into transaction (" columns ") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          on conflict (plaid_transaction_id) do update set " updates)
+        (map txn ks)]))))
+
+(defn update-balance [id balance]
+  (j/update! db :account {:balance balance} ["id = ?" id]))
