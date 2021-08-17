@@ -1,19 +1,12 @@
 (ns api
   (:require [clojure.data.json :as json]
             [clojure.string :as s]
+            [ring.util.response :refer [response header]]
             [util :refer [ok bad]]
             [plaid]
             [db]))
 
 ;; Utils
-
-(defn ok-json
-  ([body] (ok-json body {}))
-  ([body headers]
-   (ok "application/json" (json/write-str body) headers)))
-
-(defn read-json [{:keys [body]}]
-  (try (json/read-str (slurp body)) (catch Exception e nil)))
 
 (def ADMIN_EMAIL "shtaab@gmail.com")
 
@@ -25,21 +18,21 @@
     (last (re-find (re-pattern (str k "=([^;]+);")) cookie-str))))
 
 (defn get-email-from-req [req]
-  (when-let [email (get (read-json req) "email")]
+  (when-let [email (get-in req [:body "email"])]
     (if (.contains email "@") email nil)))
 
 ;; Routes
 
 (defn whoami [req]
   (if-let [account (db/get-current-account (get-cookie req "session"))]
-    (ok-json (select-keys account [:id :email :plaid_item_id :balance]))
+    (response (select-keys account [:id :email :plaid_item_id :balance]))
     (bad 401 {:detail "No session found"})))
 
 (defn dashboard [req]
   (if-let [account (db/get-current-account (get-cookie req "session"))]
     (do
       (plaid/sync-account account)
-      (ok-json {:transactions (db/get-transactions (account :id))}))
+      (response {:transactions (db/get-transactions (account :id))}))
     (bad 401 {:detail "No session found"})))
 
 (defn link [req]
@@ -47,35 +40,36 @@
    (let [{:keys [access_token item_id error_message]} (plaid/exchange-token (req :json))]
     (when error_message (throw error_message))
     (db/link-account (:account session) access_token item_id)
-    (ok-json {:plaid_item_id item_id}))
+    (response {:plaid_item_id item_id}))
   (bad 401 {:detail "No session found"})))
 
 (defn request-access [req]
   (if-let [email (get-email-from-req req)]
     (do
      (send-email ADMIN_EMAIL :request-access {:email email})
-     (println (ok-json {}))
-     (ok-json {}))
+     (response {}))
     (bad 400 {:detail "Please enter a valid email address."})))
 
 (defn send-login-code [req]
   (if-let [{:keys [id email]} (db/get-account-by-email (get-email-from-req req))]
     (do
       (send-email email :login-code {:login-code (db/refresh-login-code id)})
-      (ok-json {}))
+      (response {}))
     (bad 400 {:detail "No account was found for that email address."})))
 
 (defn login-with-code [req]
-  (let [{:keys [email code]} (read-json req)]
+  (let [email (get-in req [:body "email"])
+        code (get-in req [:body "login_code"])]
    (if-let [account (db/get-account-by-code email code)]
-    (ok-json
-      (select-keys account [:id :email :plaid_item_id :balance])
-      {"Set-Cookie" (str "session=" (db/create-session (account :id)))})
+     (header
+      (response
+       (select-keys account [:id :email :plaid_item_id :balance])
+       "Set-Cookie" (str "session=" (db/create-session (account :id)))))
     (bad 400 {:detail "Code is invalid, please try again."}))))
 
 (defn logout [req]
   (db/delete-session (get-cookie req "session"))
-  (ok-json {}))
+  (response {}))
 
 (defn root [{:keys [request-method uri] :as req}]
   (case (str (name request-method) " " (s/replace uri #"/api/" ""))

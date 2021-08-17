@@ -8,5 +8,5 @@
   (alter-var-root #'server (constantly (start-server))))
 
 (defn reload! []
-  (when server (server :timeout 100))
+  (when server (.stop server))
   (refresh :after 'user/start))

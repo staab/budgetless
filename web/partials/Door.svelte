@@ -23,7 +23,7 @@
 
   /* https://stackoverflow.com/a/10423121/1467342 */
   .door::before {
-    background-image: url('/public/images/mountain.jpg');
+    background-image: url('/images/mountain.jpg');
     background-size: cover;
     background-position: center center;
     position: absolute;
