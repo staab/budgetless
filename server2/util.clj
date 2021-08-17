@@ -1,4 +1,4 @@
-(ns server2.util
+(ns util
   (:require [clojure.data.json :as json]))
 
 (defn ok

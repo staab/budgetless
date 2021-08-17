@@ -1,4 +1,4 @@
-(ns server2.db
+(ns db
   (:require [clojure.java.jdbc :as j]
             [clojure.string :as s]))
 

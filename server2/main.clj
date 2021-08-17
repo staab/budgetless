@@ -1,8 +1,8 @@
-(ns server2.main
+(ns main
   (:require [clojure.string :as s]
             [org.httpkit.server :refer [run-server]]
-            [server2.util :refer [ok bad]]
-            [server2.api :as api]))
+            [util :refer [ok bad]]
+            [api :as api]))
 
 (def client-routes
   (->> (s/split (slurp "web/App.svelte") #"\n")

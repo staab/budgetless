@@ -1,6 +1,6 @@
 (ns user
   (:require [clojure.tools.namespace.repl :refer [refresh]]
-            [server2.main :refer [start-server]]))
+            [main :refer [start-server]]))
 
 (def server nil)
 

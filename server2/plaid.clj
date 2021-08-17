@@ -1,7 +1,7 @@
-(ns server2.plaid
+(ns plaid
   (:require [clojure.data.json :as json]
             [org.httpkit.client :as http]
-            [server2.db :as db]))
+            [db]))
 
 (def auth
   {"client_id" (System/getenv "PLAID_CLIENT_ID")

@@ -1,9 +1,9 @@
-(ns server2.api
+(ns api
   (:require [clojure.data.json :as json]
             [clojure.string :as s]
-            [server2.util :refer [ok bad]]
-            [server2.plaid :as plaid]
-            [server2.db :as db]))
+            [util :refer [ok bad]]
+            [plaid]
+            [db]))
 
 ;; Utils
 
