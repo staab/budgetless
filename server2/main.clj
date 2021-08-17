@@ -19,6 +19,18 @@
           (println e)
           (bad 500 {:detail "Internal Server Error"}))))
 
+(defn send-file [uri]
+  (let [ct (case (last (s/split uri #"\."))
+                 "svg" "image/svg+xml"
+                 "png" "image/png"
+                 "jpg" "image/jpg"
+                 "css" "text/css"
+                 "ico" "image/x-icon"
+                 "js" "test/javascript"
+                 "text/plain")]
+    (println uri ct)
+    (ok ct (slurp (str "." uri)))))
+
 (defn app [{:keys [uri query-string] :as req}]
   (if (.contains uri "..")
     (bad 404 {:detail "Not found"})
@@ -27,8 +39,8 @@
        (get client-routes uri)
        (case head
         "api" (handle-errors api/root req)
-        "public" (ok "" (slurp (str "." uri)))
-        "node_modules" (ok "" (slurp (str "." uri)))
+        "public" (send-file uri)
+        "node_modules" (send-file uri)
         :else (bad 404 {:detail "Not found"}))))))
 
 (defn start-server []

@@ -2,6 +2,6 @@
 
 export $(cat .env | grep -v '#')
 
-npx rollup -c -w
+npx rollup -c -w > /dev/null &
 
-# fd . | entr -r janet server/main.janet
+clj
