@@ -13,26 +13,27 @@
   (http/request
    {:method method
     :url (str url path)
-    :body (json/write-str data)
+    :body (json/write-str (merge auth data))
     :headers {"Content-Type" "application/json"}}))
 
 (defn exchange-token [data]
   (request "POST" "/item/public_token/exchange" data))
 
-(defn sync-transactions [{:keys [token id]} start-date offset]
-  (let [payload {:access_token token
+(defn sync-transactions [{:keys [plaid_access_token id]} start-date offset]
+  (let [payload {:access_token plaid_access_token
                  :start_date start-date
-                 :end_date (db/date "now()")
+                 :end_date (db/now)
                  :options {:count 100 :offset offset}}
         {:keys [error_message transactions accounts total_transactions]}
-        (request "POST" "/transactions/get" payload)]
+        (json/read-str (:body @(request :post "/transactions/get" payload))
+                       :key-fn keyword)]
     (when error_message (throw error_message))
-    (db/save-transactions (remove :pending transactions))
+    (db/save-transactions id (remove :pending transactions))
     [accounts total_transactions]))
 
 (defn sync-account [account]
   (let [start-date (db/get-sync-start-date (:id account))]
-    (loop [offset 0 done? (empty? (:token account)) accounts []]
+    (loop [offset 0 done? (empty? (:plaid_access_token account)) accounts []]
       (if done?
         (db/update-balance
          (:id account)
@@ -42,5 +43,5 @@
               (reduce + 0)
               (* 100)))
         (let [[accounts total] (sync-transactions account start-date offset)]
-         (recur (+ offset 100) (<= total offset) accounts))))))
+          (recur (+ offset 100) (<= total offset) accounts))))))
 

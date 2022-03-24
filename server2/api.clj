@@ -63,8 +63,8 @@
    (if-let [account (db/get-account-by-code email code)]
      (header
       (response
-       (select-keys account [:id :email :plaid_item_id :balance])
-       "Set-Cookie" (str "session=" (db/create-session (account :id)))))
+       (select-keys account [:id :email :plaid_item_id :balance]))
+       "Set-Cookie" (str "session=" (db/create-session (account :id))))
     (bad 400 {:detail "Code is invalid, please try again."}))))
 
 (defn logout [req]
